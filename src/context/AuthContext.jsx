@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx  (your file, just add ready state)
+
 import React, { createContext, useState, useEffect, useContext } from "react"
 
 const AuthContext = createContext()
@@ -8,7 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
 
-  // Load user/token from localStorage on mount
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user")
     const storedToken = localStorage.getItem("token")

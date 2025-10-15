@@ -11,7 +11,7 @@ import PrivateRoute from "./routes/PrivateRoute"
 import AppLayout from "./layouts/AppLayout"
 
 import Dashboard from "./pages/Dashboard"
-import Users from "./pages/Users"
+import UserManagement from "./pages/UserManagement"
 import Complaints from "./pages/Complaints"
 import Revenue from "./pages/Revenue"
 import Promos from "./pages/Promos"
@@ -30,7 +30,7 @@ export default function App() {
         <Route element={<PrivateRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/users" element={<Users />} />
+            <Route path="/user-management" element={<UserManagement />} />
             <Route path="/complaints" element={<Complaints />} />
             <Route path="/revenue" element={<Revenue />} />
             <Route path="/promos" element={<Promos />} />

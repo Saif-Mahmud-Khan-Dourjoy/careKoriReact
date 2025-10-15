@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext"
 
 const items = [
   { to: "/dashboard", label: "Dashboard", icon: "🏠" },
-  { to: "/users", label: "User Management", icon: "👥" },
+  { to: "/user-management", label: "User Management", icon: "👥" },
   { to: "/complaints", label: "Complaints", icon: "🧾" },
   { to: "/revenue", label: "Revenue & Transactions", icon: "📈" },
   { to: "/promos", label: "Promo Code Management", icon: "🏷️" },

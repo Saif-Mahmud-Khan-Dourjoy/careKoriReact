@@ -1,6 +1,22 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useOutletContext } from "react-router-dom"
+import RevenueProfitChart from "../components/dashboard/RevenueProfitChart";
+import UserGrowthChart from "../components/dashboard/UserGrowthChart";
+import KpiCard from "../components/dashboard/KpiCard"
+import Panel from "../components/dashboard/Panel"
+import PeriodSelect from "../components/dashboard/PeriodSelect"
+import YearSelect from "../components/dashboard/YearSelect"
+
+
+
+
 export default function Dashboard() {
+
+  const [revPeriod, setRevPeriod] = useState("Yearly")
+  const [revYear, setRevYear] = useState(2025)
+
+  const [growthPeriod, setGrowthPeriod] = useState("Monthly")
+    const [growthYear, setGrowthYear] = useState(2025)
   const { setHeader } = useOutletContext()
 
   useEffect(() => {
@@ -12,14 +28,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* header */}
-      {/* <div className="bg-white rounded-xl border p-4 sm:p-6">
-        <h1 className="text-xl sm:text-2xl font-semibold">
-          Welcome to Dashboard
-        </h1>
-        <p className="text-slate-500 text-sm">Here’s a summary of today.</p>
-      </div> */}
-
       {/* KPI cards */}
       <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <KpiCard
@@ -84,20 +92,34 @@ export default function Dashboard() {
 
       {/* charts row */}
       <section className="grid lg:grid-cols-2 gap-4">
-        <Panel title="Revenue & Profit Graph">
-          <div className="h-64 w-full rounded-lg bg-slate-50 border border-dashed grid place-items-center text-slate-400">
-            Chart Placeholder
-          </div>
+        <Panel
+          title="Revenue & Profit Graph"
+          actions={
+            <div className="flex items-center gap-2">
+              <PeriodSelect value={revPeriod} onChange={setRevPeriod} />
+              {revPeriod === "Monthly" && (
+                <YearSelect value={revYear} onChange={setRevYear} />
+              )}
+            </div>
+          }
+        >
+          <RevenueProfitChart period={revPeriod} year={revYear} />
         </Panel>
 
-        <Panel title="User Growth">
-          <div className="h-64 w-full rounded-lg bg-slate-50 border border-dashed grid place-items-center text-slate-400">
-            Chart Placeholder
-          </div>
+        <Panel
+          title="User Growth"
+          actions={
+            <div className="flex items-center gap-2">
+              <PeriodSelect value={growthPeriod} onChange={setGrowthPeriod} />
+              {growthPeriod === "Monthly" && (
+                <YearSelect value={growthYear} onChange={setGrowthYear} />
+              )}
+            </div>
+          }
+        >
+          <UserGrowthChart period={growthPeriod} year={growthYear} />
         </Panel>
       </section>
-
-      
 
       {/* approvals */}
       <section className="bg-white rounded-xl border">
@@ -172,7 +194,7 @@ export default function Dashboard() {
           </table>
         </div>
 
-        {/* tiny scroll bar mimic */}
+     
         <div className="p-4">
           <div className="h-1 w-24 bg-slate-200 rounded-full mx-auto" />
         </div>
@@ -181,38 +203,6 @@ export default function Dashboard() {
   )
 }
 
-function KpiCard({ title, total, pills = [] }) {
-  return (
-    <div className="bg-white rounded-xl border p-4 sm:p-6">
-      <div className="text-slate-500 text-sm">{title}</div>
-      <div className="text-3xl font-bold mt-1">{total}</div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {pills.map((p, i) => (
-          <span
-            key={i}
-            className={`text-xs px-2.5 py-1 rounded-full ${p.color}`}
-          >
-            <span className="font-semibold">{p.value}</span> {p.label}
-          </span>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function Panel({ title, children }) {
-  return (
-    <div className="bg-white rounded-xl border p-4 sm:p-6">
-      <div className="flex items-center justify-between">
-        <div className="font-semibold text-slate-700">{title}</div>
-        <div className="text-xs text-slate-500 bg-slate-100 rounded px-2 py-1">
-          This Year
-        </div>
-      </div>
-      <div className="mt-4">{children}</div>
-    </div>
-  )
-}
 
 const rows = [
   {
@@ -242,5 +232,5 @@ const rows = [
     fee: "3000",
     payment: "Bank",
   },
-  // add more…
+  
 ]
