@@ -1,8 +1,9 @@
 export default function YearSelect({
   value,
   onChange,
-  years = [2023, 2024, 2025],
+  years=[new Date().getFullYear()] ,
 }) {
+  console.log("YearSelect years:", years);
   return (
     <select
       value={value}

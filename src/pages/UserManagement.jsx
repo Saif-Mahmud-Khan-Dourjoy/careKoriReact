@@ -1,67 +1,23 @@
-import { use, useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useOutletContext } from "react-router-dom"
-import Modal from "../components/ui/Modal"
-
-import {
-  ActionsRow,
-  Input,
-  Label,
-  Radio,
-  Select,
-} from "../components/ui/Fields"
 import GetterDetailsModal from "../components/userManagement/GetterDetailsModal"
 import ProviderDetailsModal from "../components/userManagement/ProviderDetailsModal"
 import ModeratorDetailsModal from "../components/userManagement/ModeratorDetailsModal"
 import PopoverConfirm from "../components/ui/PopoverConfirm"
+import ProviderModal from "../components/userManagement/ProviderModal"
+import GetterModal from "../components/userManagement/GetterModal"
+import ModeratorModal from "../components/userManagement/ModeratorModal"
+import { addApi, createModeratorApi, deleteGetterApi, deleteModeratorApi, getAllGettersApi, getAllModeratorsApi, getAllProvidersApi, getProviderRolesApi, updateCommonApi, updateDoctorApi, updateGetterApi, updateLawyerApi, updateModeratorApi } from "../api/UserManagement"
+import LoaderModal from "../components/ui/LoaderModal"
+import StatusModal from "../components/ui/StatusModal"
+import { useAuth } from "../context/AuthContext"
+import { approveProviderApi, deleteProviderApi } from "../api/dashboard"
+import { getProviderRolesSpecialityApi } from "../api/promocode"
 
 
 
-const avatars = [
-  "https://i.pravatar.cc/48?img=1",
-  "https://i.pravatar.cc/48?img=2",
-  "https://i.pravatar.cc/48?img=3",
-  "https://i.pravatar.cc/48?img=4",
-  "https://i.pravatar.cc/48?img=5",
-  "https://i.pravatar.cc/48?img=6",
-]
-const gettersSeed = Array.from({ length: 8 }).map((_, i) => ({
-  id: i + 1,
-  name: [
-    "Andy Wilman",
-    "Sarah Connor",
-    "Jessica Abraham",
-    "John Wick",
-    "John Wick",
-    "John Wick",
-    "John Wick",
-    "John Wick",
-  ][i],
-  uid: [
-    "123456",
-    "456789",
-    "789123",
-    "987321",
-    "987321",
-    "987321",
-    "987321",
-    "987321",
-  ][i],
-  phone: "01612312300",
-  gender: i % 2 === 0 ? "Male" : "Female",
-  dob: i % 2 === 0 ? "1st February 2001" : "3rd March 1993",
-  address: i % 2 === 0 ? "Dhamrai, Dhaka" : "Fakirhat, Bagerhat",
-  avatar: avatars[i % avatars.length],
-}))
-const providersSeed = Array.from({ length: 7 }).map((_, i) => ({
-  id: i + 1,
-  phone: "01612312300",
-  reg: "123456789",
-  gender: i % 2 === 0 ? "Male" : "Female",
-  address: i % 2 === 0 ? "Dhamrai, Dhaka" : "Fakirhat, Bagerhat",
-  fee: [5000, 1000, 3000, 1300, 2500, 3600, 1900][i],
-  payMethod: i % 2 ? "Bank" : "Bkash",
-}))
-const moderatorsSeed = gettersSeed.slice(0, 6)
+
+
 
 function Tabs({ value, onChange }) {
   const tabs = ["Getters", "Providers", "Moderators"]
@@ -84,9 +40,275 @@ function Tabs({ value, onChange }) {
   )
 }
 
+// const TARGET_TZ = "Asia/Dhaka"
 
+// // Map your backend day strings -> day index where 0=Mon..6=Sun
+// const dayNameToIdx = {
+//   monday: 0,
+//   tuesday: 1,
+//   wednesday: 2,
+//   thursday: 3,
+//   friday: 4,
+//   saturday: 5,
+//   sunday: 6,
+// }
+
+// // Reverse: 0=Mon..6=Sun -> day string
+// const idxToDayName = [
+//   "monday",
+//   "tuesday",
+//   "wednesday",
+//   "thursday",
+//   "friday",
+//   "saturday",
+//   "sunday",
+// ]
+
+// // A known Monday anchor in UTC (Jan 1, 2024 is Monday)
+// const ANCHOR_YEAR = 2024,
+//   ANCHOR_MONTH = 0,
+//   ANCHOR_MONDAY_DAY = 1
+
+// // ---- HELPERS ----
+// const parseHMS = (t) => {
+//   const [h, m, s = "0"] = t.split(":")
+//   return { h: +h, m: +m, s: +s }
+// }
+
+// const fmt = new Intl.DateTimeFormat("en-GB", {
+//   timeZone: TARGET_TZ,
+//   weekday: "long",
+//   hour: "2-digit",
+//   minute: "2-digit",
+//   hour12: false,
+// })
+
+// const toLocalWeekdayAndHM = (date) => {
+//   const parts = fmt.formatToParts(date)
+//   const weekday = parts.find((p) => p.type === "weekday").value.toLowerCase() // e.g., "tuesday"
+//   const hour = parts.find((p) => p.type === "hour").value.padStart(2, "0")
+//   const minute = parts.find((p) => p.type === "minute").value.padStart(2, "0")
+//   return { weekday, hm: `${hour}:${minute}` }
+// }
+
+// // Build a UTC Date by anchoring the weekday and clock time to the anchor week
+// const buildUtcDate = (
+//   utcDayIdx /* 0=Mon..6=Sun */,
+//   timeStr /* HH:mm[:ss] */
+// ) => {
+//   const { h, m, s } = parseHMS(timeStr)
+//   // Jan 1, 2024 (Mon) + utcDayIdx gives the correct weekday in UTC
+//   return new Date(
+//     Date.UTC(ANCHOR_YEAR, ANCHOR_MONTH, ANCHOR_MONDAY_DAY + utcDayIdx, h, m, s)
+//   )
+// }
+
+// // Convert one UTC slot to 1–2 local slots (splits if it crosses midnight locally)
+// const convertUtcSlotToLocalSlots = (dayStrUTC, startUTC, endUTC) => {
+//   const utcDayIdx = dayNameToIdx[dayStrUTC.toLowerCase()]
+//   if (utcDayIdx == null) return []
+
+//   const startDateUTC = buildUtcDate(utcDayIdx, startUTC)
+//   const endDateUTC = buildUtcDate(utcDayIdx, endUTC)
+
+//   const startLocal = toLocalWeekdayAndHM(startDateUTC) // { weekday, hm }
+//   const endLocal = toLocalWeekdayAndHM(endDateUTC) // { weekday, hm }
+
+//   // If the slot stays within the same local day → single slot
+//   if (startLocal.weekday === endLocal.weekday) {
+//     return [
+//       {
+//         day: startLocal.weekday, // "monday".."sunday"
+//         start_time: startLocal.hm, // "HH:mm"
+//         end_time: endLocal.hm, // "HH:mm"
+//       },
+//     ]
+//   }
+
+//   // Otherwise, split across midnight so each piece is on a single day
+//   return [
+//     {
+//       day: startLocal.weekday,
+//       start_time: startLocal.hm,
+//       end_time: "23:59", // clamp to end of day
+//     },
+//     {
+//       day: endLocal.weekday,
+//       start_time: "00:00",
+//       end_time: endLocal.hm,
+//     },
+//   ]
+// }
+// // ---- Grouping with conversion ----
+
+// // ---- MAIN GROUPING ----
+// const groupAvailabilitiesLocal = (availabilities) => {
+//   if (!Array.isArray(availabilities)) return [];
+
+//   const grouped = {};
+
+//   for (const curr of availabilities) {
+//     const slots = convertUtcSlotToLocalSlots(curr.day, curr.start_time, curr.end_time);
+
+//     for (const s of slots) {
+//       const key = `${curr.availability_type}_${s.day}`;
+//       if (!grouped[key]) {
+//         grouped[key] = {
+//           availability_type: curr.availability_type,
+//           day: s.day, // already lowercase weekday string
+//           time_slots: [],
+//         };
+//       }
+//       grouped[key].time_slots.push({
+//         start_time: s.start_time,
+//         end_time: s.end_time,
+//       });
+//     }
+//   }
+
+//   // Optional: sort time slots in each group
+//   for (const g of Object.values(grouped)) {
+//     g.time_slots.sort((a, b) => a.start_time.localeCompare(b.start_time));
+//   }
+
+//   return Object.values(grouped);
+// };
+
+// const groupAvailabilities = (availabilities) => {
+//   if (!Array.isArray(availabilities)) return []
+//   return Object.values(
+//     availabilities.reduce((acc, curr) => {
+//       const key = `${curr.availability_type}_${curr.day}`
+//       if (!acc[key]) {
+//         acc[key] = {
+//           availability_type: curr.availability_type,
+//           day: curr.day,
+//           time_slots: [],
+//         }
+//       }
+//       acc[key].time_slots.push({
+//         start_time: curr.start_time.slice(0, 5),
+//         end_time: curr.end_time.slice(0, 5),
+//       })
+//       return acc
+//     }, {})
+//   )
+// }
+
+// ---- CONFIG ----
+const TARGET_TZ = "Asia/Dhaka";
+
+// day strings -> 0=Mon..6=Sun
+const dayNameToIdx = {
+  monday: 0, tuesday: 1, wednesday: 2, thursday: 3, friday: 4, saturday: 5, sunday: 6,
+};
+const idxToDayName = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+
+// A known Monday anchor in UTC (Jan 1, 2024 is Monday)
+const ANCHOR_YEAR = 2024, ANCHOR_MONTH = 0, ANCHOR_MONDAY_DAY = 1;
+
+// ---- HELPERS ----
+const parseHMS = (t) => {
+  const [h, m, s = "0"] = t.split(":");
+  return { h: +h, m: +m, s: +s };
+};
+
+const fmt = new Intl.DateTimeFormat("en-GB", {
+  timeZone: TARGET_TZ,
+  weekday: "long",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+});
+
+const toLocalWeekdayAndHMS = (date) => {
+  const parts = fmt.formatToParts(date);
+  const weekday = parts.find(p => p.type === "weekday").value.toLowerCase();
+  const hh = parts.find(p => p.type === "hour").value.padStart(2, "0");
+  const mm = parts.find(p => p.type === "minute").value.padStart(2, "0");
+  const ss = parts.find(p => p.type === "second").value.padStart(2, "0");
+  return { weekday, hms: `${hh}:${mm}:${ss}` };
+};
+
+const buildUtcDate = (utcDayIdx, timeStr /* HH:mm[:ss] */) => {
+  const { h, m, s } = parseHMS(timeStr);
+  return new Date(Date.UTC(ANCHOR_YEAR, ANCHOR_MONTH, ANCHOR_MONDAY_DAY + utcDayIdx, h, m, s));
+};
+
+// Convert one UTC slot to 1–2 local slots (split if crosses midnight locally)
+const convertUtcSlotToLocalSlots = (dayStrUTC, startUTC, endUTC) => {
+  const utcDayIdx = dayNameToIdx[dayStrUTC.toLowerCase()];
+  if (utcDayIdx == null) return [];
+
+  const startDateUTC = buildUtcDate(utcDayIdx, startUTC);
+  const endDateUTC   = buildUtcDate(utcDayIdx, endUTC);
+
+  const startLocal = toLocalWeekdayAndHMS(startDateUTC); // { weekday, hms }
+  const endLocal   = toLocalWeekdayAndHMS(endDateUTC);   // { weekday, hms }
+
+  if (startLocal.weekday === endLocal.weekday) {
+    return [{
+      day: startLocal.weekday,
+      start_time: startLocal.hms,
+      end_time: endLocal.hms,
+    }];
+  }
+
+  // split across midnight
+  return [
+    {
+      day: startLocal.weekday,
+      start_time: startLocal.hms,
+      end_time: "23:59:59",
+    },
+    {
+      day: endLocal.weekday,
+      start_time: "00:00:00",
+      end_time: endLocal.hms,
+    },
+  ];
+};
+
+// sort by HH:mm:ss
+const cmpHMS = (a, b) => a.localeCompare(b);
+
+// ---- MAIN GROUPING ----
+const groupAvailabilitiesLocal = (availabilities) => {
+  if (!Array.isArray(availabilities)) return [];
+
+  const grouped = {};
+
+  for (const curr of availabilities) {
+    const slots = convertUtcSlotToLocalSlots(curr.day, curr.start_time, curr.end_time);
+
+    for (const s of slots) {
+      const key = `${curr.availability_type}_${s.day}`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          availability_type: curr.availability_type,
+          day: s.day,
+          time_slots: [],
+        };
+      }
+      grouped[key].time_slots.push({
+        start_time: s.start_time,
+        end_time: s.end_time,
+      });
+    }
+  }
+
+  // sort time slots within each day
+  for (const g of Object.values(grouped)) {
+    g.time_slots.sort((a, b) => cmpHMS(a.start_time, b.start_time));
+  }
+
+  return Object.values(grouped);
+};
 
 export default function UserManagement() {
+  const { user } = useAuth()
+  console.log(user)
   const { setHeader } = useOutletContext?.() || { setHeader: () => {} }
   useEffect(() => {
     setHeader({
@@ -108,147 +330,512 @@ export default function UserManagement() {
   const [deleteProviderAnchor, setDeleteProviderAnchor] = useState(null)
   const [deleteModeratorAnchor, setDeleteModeratorAnchor] = useState(null)
 
-  const getters = useMemo(
-    () =>
-      gettersSeed.filter((r) =>
-        q
-          ? (r.name + r.uid + r.phone).toLowerCase().includes(q.toLowerCase())
-          : true
-      ),
-    [q]
-  )
-  const providers = useMemo(
-    () =>
-      providersSeed.filter((r) =>
-        q
-          ? (r.phone + r.reg + r.address)
-              .toLowerCase()
-              .includes(q.toLowerCase())
-          : true
-      ),
-    [q]
-  )
-  const moderators = useMemo(
-    () =>
-      moderatorsSeed.filter((r) =>
-        q
-          ? (r.name + r.uid + r.phone).toLowerCase().includes(q.toLowerCase())
-          : true
-      ),
-    [q]
-  )
+  const [getters, setGetters] = useState([]);
+  const [filteredGetters, setFilteredGetters] = useState([]);
+  const [providers, setProviders] = useState([]);
+  const [moderators, setModerators] = useState([]);
+  const [filteredProviders, setFilteredProviders] = useState([]);
+  const [filteredModerators, setFilteredModerators] = useState([]);
+  const [getterRole, setGetterRole] = useState(null);
+  const [moderatorRole, setModeratorRole] = useState(null);
 
-  const removeGetter = useCallback((id) => {  
-    console.log("Remove getter with id:", id)
+  const [getterInitial, setGetterInitial] = useState(null);
+  const [providerInitial, setProviderInitial] = useState(null);
+  const [moderatorInitial, setModeratorInitial] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusModalSuccess, setStatusModalSuccess] = useState(null);
+  const [providerRoles, setProviderRoles] = useState([]);
+  const [providerSpeciality,setProviderSpeciality]=useState([])
+  const [errorMsg,setErrorMsg]=useState(null)
+
+   const getAllGetters = async () => {
+     const [success, data] = await getAllGettersApi()
+     if (success) {
+       console.log("Getters data:", data)
+       setGetters(data?.customers)
+       setFilteredGetters(data?.customers)
+       setGetterRole(
+         data?.customers?.length > 0 ? data?.customers[0]?.role_id : null
+       )
+     } else {
+       console.error("Failed to fetch getters:", data)
+     }
+   }
+
+   const deleteGetter = async (uniqueUserId) => {
+    setLoading(true)
+     const [success, data] = await deleteGetterApi(uniqueUserId)
+     if (success) {
+       console.log("Deleted successfully:", data)
+        setLoading(false)
+       setStatusModalSuccess(true)
+       setStatusModalOpen(true)
+     } else {
+       console.error("Failed to delete getter:", data)
+        setLoading(false)
+       setStatusModalSuccess(false)
+       setStatusModalOpen(true)
+     }
+   }  
+
+     const addData = async (formData) => {
+       setLoading(true)
+       const [success, data] = await addApi(formData)
+       if (success) {
+         console.log("Added successfully:", data)
+         setLoading(false)
+         setStatusModalSuccess(true)
+         setStatusModalOpen(true)
+       } else {
+         setErrorMsg(data)
+         setLoading(false)
+         setStatusModalSuccess(false)
+         setStatusModalOpen(true)
+       }
+     }
+
+   const updateGetter = async (uniqueUserId, formData) => {
+     setLoading(true)
+     const [success, data] = await updateGetterApi(uniqueUserId, formData)
+     if (success) {
+       console.log("Updated successfully:", data)
+       setLoading(false)
+       setStatusModalSuccess(true)
+       setStatusModalOpen(true)
+     } else {
+       console.error("Failed to update getter:", data)
+       setErrorMsg(data)
+       setLoading(false)
+       setStatusModalSuccess(false)
+       setStatusModalOpen(true)
+     }
+   }
+
+  const getAllModerators= async () => {
+    const [success, data] = await getAllModeratorsApi()
+    if (success) {
+      console.log("Moderators data:", data)
+      let filteredData = data?.moderators?.filter(item => item?.unique_user_id != user?.unique_user_id)
+
+      setModerators(filteredData)
+      setFilteredModerators(filteredData)
+      setModeratorRole(
+        filteredData?.length > 0 ? filteredData[0]?.role_id : null
+      )
+    } else {
+      console.error("Failed to fetch moderators:", data)
+    }
+  }
+
+
+
+  const addModerator = async (formData) => {
+    setLoading(true)
+    const [success, data] = await createModeratorApi(formData)
+    if (success) {
+      console.log("Added successfully:", data)
+      setLoading(false)
+      setStatusModalSuccess(true)
+      setStatusModalOpen(true)
+    } else {
+      setErrorMsg(data)
+      setLoading(false)
+      setStatusModalSuccess(false)
+      setStatusModalOpen(true)
+    }
+  }
+
+  const updateModerator = async (uniqueUserId, formData) => {
+    setLoading(true)
+    const [success, data] = await updateModeratorApi(uniqueUserId, formData)
+    if (success) {
+      console.log("Updated successfully:", data)
+      setLoading(false)
+      setStatusModalSuccess(true)
+      setStatusModalOpen(true)
+    } else {
+      console.error("Failed to update getter:", data)
+      setErrorMsg(data)
+      setLoading(false)
+      setStatusModalSuccess(false)
+      setStatusModalOpen(true)
+    }
+  }
+
+  const deleteModerator = async (uniqueUserId) => {
+    setLoading(true)
+    const [success, data] = await deleteModeratorApi(uniqueUserId)
+    if (success) {
+      console.log("Deleted successfully:", data)
+      setLoading(false)
+      setStatusModalSuccess(true)
+      setStatusModalOpen(true)
+    } else {
+      console.error("Failed to delete moderator:", data)
+      setLoading(false)
+      setStatusModalSuccess(false)
+      setStatusModalOpen(true)
+    }
+  }  
+
+ const getAllProviders = async () => {
+   const [success, data] = await getAllProvidersApi()
+   if (success) {
+    console.log("Raw Providers data:", data)
+      const transformedProviders = (data?.providers || []).map((provider) => ({
+        ...provider,
+        availabilities: groupAvailabilitiesLocal(
+          provider.availabilities
+        ),
+      }))
+     console.log("Providers data:", transformedProviders)
+     setProviders(transformedProviders)
+     setFilteredProviders(transformedProviders)
+   } else {
+     console.error("Failed to fetch providers:", data)
+   }
+ }
+
+   const approveProvider = async (uniqueUserId) => {
+    setLoading(true)
+      const [success, data] = await approveProviderApi(uniqueUserId)
+       if (success) {
+         console.log("Approved successfully:", data)
+         setLoading(false)
+         setStatusModalSuccess(true)
+         setStatusModalOpen(true)
+       } else {
+         console.error("Failed to approve provider:", data)
+         setLoading(false)
+         setStatusModalSuccess(false)
+         setStatusModalOpen(true)
+       }
+    }
+
+    const deleteProvider = async (uniqueUserId) => {
+     setLoading(true)
+     const [success, data] = await deleteProviderApi(uniqueUserId)
+     if (success) {
+       console.log("Deleted successfully:", data)
+       setLoading(false)
+       setStatusModalSuccess(true)
+       setStatusModalOpen(true)
+     } else {
+       console.error("Failed to delete provider:", data)
+       setLoading(false)
+       setStatusModalSuccess(false)
+       setStatusModalOpen(true)
+     }
+    }
+
+    const getProviderRoles = async () => {
+      setLoading(true)
+      const [success, data] = await getProviderRolesApi()
+      if (success) {
+        let makeOptions = data?.roles?.map((role) => ({
+          value: role.id,
+          label: role.name,
+        }))
+        console.log("Provider roles data:", makeOptions)
+        setProviderRoles(makeOptions)
+      } else {
+        console.error("Failed to fetch provider roles:", data)
+      }
+      setLoading(false)
+    }
+
+     const getProviderRolesSpeciality = async () => {
+       const [success, data] = await getProviderRolesSpecialityApi()
+       if (success) {
+         console.log(
+           "Fetched provider role's specialities:",
+           data?.roleSpecialities
+         )
+         setProviderSpeciality(data?.roleSpecialities || [])
+       } else {
+         console.error("Error fetching provider role's specialities:", data)
+       }
+     }
+
+     const updateDoctor = async (uniqueUserId, formData) => {
+       setLoading(true)
+       const [success, data] = await updateDoctorApi(uniqueUserId, formData)
+       if (success) {
+         console.log("Updated successfully:", data)
+         setLoading(false)
+         setStatusModalSuccess(true)
+         setStatusModalOpen(true)
+       } else {
+         console.error("Failed to update doctor:", data)
+         setLoading(false)
+         setStatusModalSuccess(false)
+         setStatusModalOpen(true)
+       }
+     }
+
+     const updateLawyer = async (uniqueUserId, formData) => {
+       setLoading(true)
+       const [success, data] = await updateLawyerApi(uniqueUserId, formData)
+       if (success) {
+         console.log("Updated successfully:", data)
+         setLoading(false)
+         setStatusModalSuccess(true)
+         setStatusModalOpen(true)
+       } else {
+         console.error("Failed to update lawyer:", data)
+         setLoading(false)
+         setStatusModalSuccess(false)
+         setStatusModalOpen(true)
+       }
+     }
+
+     const updateCommon = async (uniqueUserId, formData) => { 
+        setLoading(true)
+        const [success, data] = await updateCommonApi(uniqueUserId, formData)
+        if (success) {
+          console.log("Updated successfully:", data)
+          setLoading(false)
+          setStatusModalSuccess(true)
+          setStatusModalOpen(true)
+        } else {
+          console.error("Failed to update common:", data)
+          setLoading(false)
+          setStatusModalSuccess(false)
+          setStatusModalOpen(true)
+        }
+      }
+
+useEffect(() => {
+  const handler = setTimeout(() => {
+    const s = q.toLowerCase()
+    if (tab === "Getters") {
+      setFilteredGetters(
+        !q
+          ? getters
+          : getters.filter((r) =>
+              `${r.name} ${r.unique_user_id} ${r.phone}`.toLowerCase().includes(s)
+            )
+      )
+    } else if (tab === "Providers") {
+      setFilteredProviders(
+        !q
+          ? providers
+          : providers.filter((r) =>
+              `${r.phone} ${r.name} ${r?.profile?.registration_no || r?.profile?.bar_registration_no || r?.profile?.unique_identification?.unique_identification_no
+                 }`
+                .toLowerCase()
+                .includes(s)
+            )
+      )
+    } else if (tab === "Moderators") {
+      setFilteredModerators(
+        !q
+          ? moderators
+          : moderators.filter((r) =>
+              `${r.name} ${r.unique_user_id} ${r.phone}`
+                .toLowerCase()
+                .includes(s)
+            )
+      )
+    }
+  }, 300)
+  return () => clearTimeout(handler)
+}, [q, tab, getters, providers, moderators])
+
+  const removeGetter = useCallback(async (uniqueUserId) => {
+    await deleteGetter(uniqueUserId);
   }, [])
-  const removeProvider = useCallback((id) => {
+  const removeProvider = useCallback(async (id) => {
     console.log("Remove provider with id:", id)
   }, [])
-  const removeModerator = useCallback((id) => {
-    console.log("Remove moderator with id:", id)
+  const removeModerator = useCallback(async (uniqueUserId) => {
+    await deleteModerator(uniqueUserId)
   }, [])
 
+
+
+
+
+  useEffect(() => {
+    
+    if(tab==="Getters"){
+      setLoading(true)
+      getAllGetters().finally(() => setLoading(false))
+    }
+    else if (tab === "Moderators") {
+      setLoading(true)
+      getAllModerators().finally(() => setLoading(false))
+    }
+    else if (tab === "Providers") {
+      setLoading(true)
+      Promise.all([
+        getAllProviders(),
+        getProviderRoles(),
+        getProviderRolesSpeciality(),
+      ]).finally(() => setLoading(false))
+    }
+  }, [tab]);
+
+
+  const closeStatusModal = () => {
+    setStatusModalOpen(false)
+    setErrorMsg(null)
+    if (statusModalSuccess && tab === "Getters") {
+      setLoading(true)
+      getAllGetters().finally(() => setLoading(false))
+    }
+    else if (statusModalSuccess && tab === "Providers") {
+      setLoading(true)
+      getAllProviders().finally(()=> setLoading(false))
+    }
+    else if (statusModalSuccess && tab === "Moderators") {
+      setLoading(true)
+      getAllModerators().finally(() => setLoading(false))
+    }
+  }
+
+
+
   return (
-    <div className="space-y-4">
-      {/* tabs row + search + add button */}
-      <div className="flex items-center flex-wrap justify-between gap-3">
-        <Tabs
-          value={tab}
-          onChange={(t) => {
-            setTab(t)
-            setQ("")
-            setHeader({
-              title:
-                t === "Getters"
-                  ? "Service Getter Management"
-                  : t === "Providers"
-                  ? "Service Provider Management"
-                  : "Moderator Management",
-              subtitle: "Here’s a summary of today.",
-            })
-          }}
-        />
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-              🔎
-            </span>
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder={`Search ${tab}`}
-              className="w-auto sm:w-72 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-            />
+    <>
+      <LoaderModal
+        open={loading}
+        title="In Progress"
+        subtitle="Please wait while loading."
+        dimBackdrop
+        blurBackdrop
+      />
+      <StatusModal
+        open={statusModalOpen}
+        onClose={closeStatusModal}
+        success={statusModalSuccess}
+        errorMsg={errorMsg}
+      />
+      <div className="space-y-4">
+        {/* tabs row + search + add button */}
+        <div className="flex items-center flex-wrap justify-between gap-3">
+          <Tabs
+            value={tab}
+            onChange={(t) => {
+              setTab(t)
+              setQ("")
+              setHeader({
+                title:
+                  t === "Getters"
+                    ? "Service Getter Management"
+                    : t === "Providers"
+                    ? "Service Provider Management"
+                    : "Moderator Management",
+                subtitle: "Here’s a summary of today.",
+              })
+            }}
+          />
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                🔎
+              </span>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={`Search ${tab}`}
+                className="w-auto sm:w-72 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+              />
+            </div>
+            {tab === "Getters" && (
+              <button
+                onClick={() => setAddGetterOpen(true)}
+                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
+              >
+                ⊕ Add Getter
+              </button>
+            )}
+            {tab === "Providers" && (
+              <button
+                onClick={() => setAddProviderOpen(true)}
+                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
+              >
+                ⊕ Add Provider
+              </button>
+            )}
+            {tab === "Moderators" && (
+              <button
+                onClick={() => setAddModeratorOpen(true)}
+                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
+              >
+                ⊕ Add Moderator
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* table card */}
+        <div className="rounded-xl border bg-white">
           {tab === "Getters" && (
-            <button
-              onClick={() => setAddGetterOpen(true)}
-              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
-            >
-              ⊕ Add Getter
-            </button>
+            <GetterTable
+              rows={filteredGetters}
+              setGetterInitial={setGetterInitial}
+              setAddGetterOpen={setAddGetterOpen}
+              removeGetter={removeGetter}
+            />
           )}
           {tab === "Providers" && (
-            <button
-              onClick={() => setAddProviderOpen(true)}
-              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
-            >
-              ⊕ Add Provider
-            </button>
+            <ProviderTable
+              rows={filteredProviders}
+              setProviderInitial={setProviderInitial}
+              setAddProviderOpen={setAddProviderOpen}
+              removeProvider={removeProvider}
+              approveProvider={approveProvider}
+              deleteProvider={deleteProvider}
+            />
           )}
           {tab === "Moderators" && (
-            <button
-              onClick={() => setAddModeratorOpen(true)}
-              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
-            >
-              ⊕ Add Moderator
-            </button>
+            <ModeratorTable
+              rows={filteredModerators}
+              setModeratorInitial={setModeratorInitial}
+              setAddModeratorOpen={setAddModeratorOpen}
+              removeModerator={removeModerator}
+            />
           )}
         </div>
-      </div>
 
-      {/* table card */}
-      <div className="rounded-xl border bg-white">
-        {tab === "Getters" && (
-          <GetterTable
-            rows={getters}
-            setAddGetterDetailsOpen={setAddGetterDetailsOpen}
-            setRecordToEdit={setRecordToEdit}
-            removeGetter={removeGetter}
-          />
-        )}
-        {tab === "Providers" && (
-          <ProviderTable
-            rows={providers}
-            setAddProviderDetailsOpen={setAddProviderDetailsOpen}
-            setRecordToEdit={setRecordToEdit}
-            removeProvider={removeProvider}
-          />
-        )}
-        {tab === "Moderators" && (
-          <ModeratorTable
-            rows={moderators}
-            setAddModeratorDetailsOpen={setAddModeratorDetailsOpen}
-            setRecordToEdit={setRecordToEdit}
-            removeModerator={removeModerator}
-          />
-        )}
-      </div>
-
-      {/* MODALS */}
-      <GetterModal
-        open={addGetterOpen}
-        onClose={() => setAddGetterOpen(false)}
-      />
-      <ProviderModal
-        open={addProviderOpen}
-        onClose={() => setAddProviderOpen(false)}
-      />
-      <ModeratorModal
-        open={addModeratorOpen}
-        onClose={() => setAddModeratorOpen(false)}
-      />
-      <GetterDetailsModal
+        {/* MODALS */}
+        <GetterModal
+          open={addGetterOpen}
+          onClose={() => {
+            setAddGetterOpen(false)
+            setGetterInitial(null)
+          }}
+          initial={getterInitial}
+          onSubmit={addData}
+          onEdit={updateGetter}
+          getterRole={getterRole}
+        />
+        <ProviderModal
+          open={addProviderOpen}
+          onClose={() =>{ setAddProviderOpen(false) , setProviderInitial(null)}}
+          initial={providerInitial}
+          providerRoles={providerRoles}
+          providerSpeciality={providerSpeciality}
+          onSubmit={addData}
+          onUpdateDoctor={updateDoctor}
+          onUpdateLawyer={updateLawyer}
+          onUpdateCommon={updateCommon}
+        />
+        <ModeratorModal
+          open={addModeratorOpen}
+          onClose={() => {
+            setModeratorInitial(null)
+            setAddModeratorOpen(false)
+          }}
+          initial={moderatorInitial}
+          onSubmit={addModerator}
+          onEdit={updateModerator}
+          moderatorRole={moderatorRole}
+        />
+        {/* <GetterDetailsModal
         open={addGetterDetailsOpen}
         onClose={() => setAddGetterDetailsOpen(false)}
         record={recordToEdit}
@@ -262,16 +849,17 @@ export default function UserManagement() {
         open={addModeratorDetailsOpen}
         onClose={() => setAddModeratorDetailsOpen(false)}
         record={recordToEdit}
-      />
-    </div>
+      /> */}
+      </div>
+    </>
   )
 }
 
 /* ------------ TABLES ------------- */
 
-function Th({ children }) {
+function Th({ className=null, children }) {
   return (
-    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
+    <th className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 ${className}`}>
       {children}
     </th>
   )
@@ -280,16 +868,20 @@ function Td({ children }) {
   return <td className="px-4 py-3 text-sm text-slate-700">{children}</td>
 }
 
-function GetterTable({ rows, setAddGetterDetailsOpen, setRecordToEdit, removeGetter }) {
+function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter }) {
   const [deleteGetterAnchor, setDeleteGetterAnchor] = useState(null) 
 
-  const removeRow = (id) => {
-   removeGetter(id);
+  const removeRow = async (uniqueUserId) => {
+    await removeGetter(uniqueUserId)
   }
   const handleClick = (record) => {
     
-    setRecordToEdit(record);
-    setAddGetterDetailsOpen(true);
+    // setRecordToEdit(record);
+    // setAddGetterDetailsOpen(true)
+    setGetterInitial(record);
+    setAddGetterOpen(true);
+    
+    
   };
   return (
     <div className="overflow-x-auto">
@@ -311,17 +903,18 @@ function GetterTable({ rows, setAddGetterDetailsOpen, setRecordToEdit, removeGet
               <Td>{i + 1}</Td>
               <Td>
                 <div className="flex items-center gap-3">
-                  <img src={r.avatar} alt="" className="h-8 w-8 rounded-full" />
+
+                {r?.customer_profile?.avatar && <img src={r.customer_profile.avatar} alt="" className="h-8 w-8 rounded-full" />}
                   <div>
-                    <div className="font-medium">{r.name}</div>
-                    <div className="text-xs text-slate-400">{r.uid}</div>
+                    <span className="font-medium">{r.name}</span>
+                    <span className="text-xs text-slate-400">{` (${r.unique_user_id})`}</span>
                   </div>
                 </div>
               </Td>
               <Td className="font-medium">{r.phone}</Td>
-              <Td>{r.gender}</Td>
-              <Td>{r.dob}</Td>
-              <Td>{r.address}</Td>
+              <Td>{r.customer_profile?.gender}</Td>
+              <Td>{r.customer_profile?.dob}</Td>
+              <Td>{r.customer_profile?.address}</Td>
               <Td>
                 <div className="flex gap-2">
                   <button
@@ -335,7 +928,7 @@ function GetterTable({ rows, setAddGetterDetailsOpen, setRecordToEdit, removeGet
                       <PopoverConfirm
                         open={deleteGetterAnchor === r.id}
                         onClose={() => setDeleteGetterAnchor(null)}
-                        onYes={() => removeRow(r.id)}
+                        onYes={() => removeRow(r.unique_user_id)}
                       />
                     </div>
                     <button className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 text-red-600 border-red-200" onClick={() => setDeleteGetterAnchor((cur) => (cur === r.id ? null : r.id))}>
@@ -352,15 +945,23 @@ function GetterTable({ rows, setAddGetterDetailsOpen, setRecordToEdit, removeGet
   )
 }
 
-function ProviderTable({ rows, setAddProviderDetailsOpen,setRecordToEdit, removeProvider }) {
+function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removeProvider , approveProvider, deleteProvider }) {
   const [deleteProviderAnchor, setDeleteProviderAnchor] = useState(null)
+  const [acceptProviderAnchor, setAcceptProviderAnchor] = useState(null)
 
-  const removeRow = (id) => {
-    removeProvider(id)
+  const [rejectProviderAnchor, setRejectProviderAnchor] = useState(null)
+
+
+  const removeRow = async (uniqueUserId) => {
+    await deleteProvider(uniqueUserId)
+  }
+  const approveRow = async (uniqueUserId) => {
+    await approveProvider(uniqueUserId)
   }
     const handleClick = (record) => {
-      setRecordToEdit(record);
-      setAddProviderDetailsOpen(true);
+      
+      setProviderInitial(record)
+      setAddProviderOpen(true)
   };
   return (
     <div className="overflow-x-auto">
@@ -373,26 +974,93 @@ function ProviderTable({ rows, setAddProviderDetailsOpen,setRecordToEdit, remove
             <Th>Address</Th>
             <Th>Consultation Fee</Th>
             <Th>Payment Method</Th>
-            <Th>Action</Th>
+            <Th className="text-center">Action</Th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
             <tr key={i} className="border-b last:border-0">
               <Td className="font-medium">{r.phone}</Td>
-              <Td>{r.reg}</Td>
-              <Td>{r.gender}</Td>
-              <Td>{r.address}</Td>
-              <Td>{r.fee}</Td>
-              <Td>{r.payMethod}</Td>
               <Td>
-                <div className="flex gap-2">
-                  <button className="rounded bg-emerald-500/90 text-white px-3 py-1.5 text-xs hover:bg-emerald-600">
-                    Accept
-                  </button>
-                  <button className="rounded bg-rose-500/90 text-white px-3 py-1.5 text-xs hover:bg-rose-600">
-                    Reject
-                  </button>
+                {r?.profile_type == "doctor"
+                  ? r?.profile?.registration_no
+                  : r?.profile_type == "lawyer"
+                  ? r?.profile?.bar_registration_no
+                  : r?.profile?.unique_identification?.unique_identification_no}
+              </Td>
+              <Td>{r?.profile?.gender}</Td>
+              <Td>{r?.profile?.address}</Td>
+              <Td>{r?.profile?.pricing}</Td>
+              <Td>{r?.profile?.payment_type}</Td>
+              <Td>
+                <div className="flex gap-2 justify-end">
+                  {(r?.profile?.active_status == 0 ||
+                    r?.profile?.active_status == null ||
+                    r?.profile?.active_status == false) && (
+                    <>
+                      {/* <button
+                        className="rounded bg-emerald-500/90 text-white px-3 py-1.5 text-xs hover:bg-emerald-600"
+                        onClick={() =>
+                          setAcceptProviderAnchor((cur) =>
+                            cur === r.id ? null : r.id
+                          )
+                        }
+                      >
+                        Accept
+                      </button> */}
+                      <div className="relative">
+                        <div className="absolute right-0 top-[-190%] z-50">
+                          <PopoverConfirm
+                            open={acceptProviderAnchor === r.id}
+                            onClose={() => setAcceptProviderAnchor(null)}
+                            onYes={() => approveRow(r.unique_user_id)}
+                            title="Approve this entry?"
+                          />
+                        </div>
+                        <button
+                          className="rounded bg-emerald-500/90 text-white px-3 py-1.5 text-xs hover:bg-emerald-600"
+                          onClick={() =>
+                            setAcceptProviderAnchor((cur) =>
+                              cur === r.id ? null : r.id
+                            )
+                          }
+                        >
+                          Accept
+                        </button>
+                      </div>
+                      {/* <button
+                        className=""
+                        onClick={() =>
+                          setRejectProviderAnchor((cur) =>
+                            cur === r.id ? null : r.id
+                          )
+                        }
+                      >
+                        Reject
+                      </button> */}
+
+                      <div className="relative">
+                        <div className="absolute right-0 top-[-190%] z-50">
+                          <PopoverConfirm
+                            open={rejectProviderAnchor === r.id}
+                            onClose={() => setRejectProviderAnchor(null)}
+                            onYes={() => removeRow(r.unique_user_id)}
+                            title="Reject this entry?"
+                          />
+                        </div>
+                        <button
+                          className="rounded bg-rose-500/90 text-white px-3 py-1.5 text-xs hover:bg-rose-600"
+                          onClick={() =>
+                            setRejectProviderAnchor((cur) =>
+                              cur === r.id ? null : r.id
+                            )
+                          }
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </>
+                  )}
                   <button
                     className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
@@ -404,7 +1072,7 @@ function ProviderTable({ rows, setAddProviderDetailsOpen,setRecordToEdit, remove
                       <PopoverConfirm
                         open={deleteProviderAnchor === r.id}
                         onClose={() => setDeleteProviderAnchor(null)}
-                        onYes={() => removeRow(r.id)}
+                        onYes={() => removeRow(r.unique_user_id)}
                       />
                     </div>
                     <button
@@ -428,14 +1096,14 @@ function ProviderTable({ rows, setAddProviderDetailsOpen,setRecordToEdit, remove
   )
 }
 
-function ModeratorTable({ rows, setAddModeratorDetailsOpen,setRecordToEdit, removeModerator }) {
+function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, removeModerator }) {
   const [deleteModeratorAnchor, setDeleteModeratorAnchor] = useState(null)
-  const removeRow = (id) => {
-    removeModerator(id)
+  const removeRow = (uniqueUserId) => {
+    removeModerator(uniqueUserId)
   }
   const handleClick = (record) => {
-    setRecordToEdit(record);
-    setAddModeratorDetailsOpen(true);
+    setModeratorInitial(record)
+    setAddModeratorOpen(true)
   };
   return (
     <div className="overflow-x-auto">
@@ -447,7 +1115,7 @@ function ModeratorTable({ rows, setAddModeratorDetailsOpen,setRecordToEdit, remo
             <Th>Phone</Th>
             <Th>Gender</Th>
             <Th>Date of Birth</Th>
-            <Th>Address</Th>
+            <Th>Name</Th>
             <Th>Action</Th>
           </tr>
         </thead>
@@ -457,17 +1125,24 @@ function ModeratorTable({ rows, setAddModeratorDetailsOpen,setRecordToEdit, remo
               <Td>{i + 1}</Td>
               <Td>
                 <div className="flex items-center gap-3">
-                  <img src={r.avatar} alt="" className="h-8 w-8 rounded-full" />
+                  {r?.moderator_profile?.avatar && (
+                    <img
+                      src={r?.moderator_profile?.avatar}
+                      alt=""
+                      className="h-8 w-8 rounded-full"
+                    />
+                  )}
                   <div>
-                    <div className="font-medium">{r.name}</div>
-                    <div className="text-xs text-slate-400">{r.uid}</div>
+                    <div className="text-xs text-slate-400">
+                      {r?.unique_user_id}
+                    </div>
                   </div>
                 </div>
               </Td>
-              <Td className="font-medium">{r.phone}</Td>
-              <Td>{r.gender}</Td>
-              <Td>{r.dob}</Td>
-              <Td>{r.address}</Td>
+              <Td className="font-medium">{r?.phone}</Td>
+              <Td>{r?.moderator_profile?.gender}</Td>
+              <Td>{r?.moderator_profile?.dob}</Td>
+              <Td>{r?.name}</Td>
               <Td>
                 <div className="flex gap-2">
                   <button
@@ -479,16 +1154,16 @@ function ModeratorTable({ rows, setAddModeratorDetailsOpen,setRecordToEdit, remo
                   <div className="relative">
                     <div className="absolute right-0 top-[-190%] z-50">
                       <PopoverConfirm
-                        open={deleteModeratorAnchor === r.id}
+                        open={deleteModeratorAnchor === r.unique_user_id}
                         onClose={() => setDeleteModeratorAnchor(null)}
-                        onYes={() => removeRow(r.id)}
+                        onYes={() => removeRow(r.unique_user_id)}
                       />
                     </div>
                     <button
                       className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 text-red-600 border-red-200"
                       onClick={() =>
                         setDeleteModeratorAnchor((cur) =>
-                          cur === r.id ? null : r.id
+                          cur === r.unique_user_id ? null : r.unique_user_id
                         )
                       }
                     >
@@ -505,455 +1180,6 @@ function ModeratorTable({ rows, setAddModeratorDetailsOpen,setRecordToEdit, remo
   )
 }
 
-/* ------------ MODALS ------------- */
 
-function GetterModal({ open, onClose }) {
-  const [form, setForm] = useState({
-    name: "",
-    gender: "Male",
-    district: "",
-    subdistrict: "",
-    phone: "",
-    dob: "",
-    pass: "",
-    pass2: "",
-  })
-  const change = (k, v) => setForm((s) => ({ ...s, [k]: v }))
 
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Add Service Getter"
-      widthClass="max-w-xl"
-    >
-      <div className="grid grid-cols-1 gap-4">
-        <div>
-          <Label>Name</Label>
-          <Input
-            value={form.name}
-            onChange={(e) => change("name", e.target.value)}
-            placeholder="Enter Name"
-          />
-        </div>
 
-        <div>
-          <Label>Gender</Label>
-          <div className="flex items-center gap-6">
-            <Radio
-              name="g1"
-              checked={form.gender === "Male"}
-              label="Male"
-              onChange={() => change("gender", "Male")}
-            />
-            <Radio
-              name="g1"
-              checked={form.gender === "Female"}
-              label="Female"
-              onChange={() => change("gender", "Female")}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Address</Label>
-            <Select
-              value={form.district}
-              onChange={(e) => change("district", e.target.value)}
-            >
-              <option value="">District</option>
-              <option>Dhaka</option>
-              <option>Chittagong</option>
-            </Select>
-          </div>
-          <div className="mt-6 md:mt-0">
-            <Select
-              value={form.subdistrict}
-              onChange={(e) => change("subdistrict", e.target.value)}
-            >
-              <option value="">Sub District</option>
-              <option>Dhamrai</option>
-              <option>Fakirhat</option>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Phone</Label>
-            <Input
-              value={form.phone}
-              onChange={(e) => change("phone", e.target.value)}
-              placeholder="Number"
-            />
-          </div>
-          <div>
-            <Label>Date of Birth</Label>
-            <Input
-              type="date"
-              value={form.dob}
-              onChange={(e) => change("dob", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Password</Label>
-            <Input
-              type="password"
-              value={form.pass}
-              onChange={(e) => change("pass", e.target.value)}
-              placeholder="Password"
-            />
-          </div>
-          <div>
-            <Label>Re-Enter Password</Label>
-            <Input
-              type="password"
-              value={form.pass2}
-              onChange={(e) => change("pass2", e.target.value)}
-              placeholder="Password"
-            />
-          </div>
-        </div>
-
-        <ActionsRow onCancel={onClose} onSave={() => onClose()} />
-      </div>
-    </Modal>
-  )
-}
-
-function ProviderModal({ open, onClose }) {
-  const [form, setForm] = useState({
-    name: "",
-    gender: "Male",
-    district: "",
-    subdistrict: "",
-    phone: "",
-    dob: "",
-    pass: "",
-    pass2: "",
-    about: "",
-    payMethod: "",
-    bkashNo: "",
-    bkashName: "",
-    bank: "",
-    bankAcc: "",
-    accTitle: "",
-    occupation: "",
-    department: "",
-    regNo: "",
-  })
-  const change = (k, v) => setForm((s) => ({ ...s, [k]: v }))
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Add Service Provider"
-      widthClass="max-w-3xl"
-    >
-      <div className="grid grid-cols-1 gap-4">
-        {/* top identity */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Name</Label>
-            <Input
-              value={form.name}
-              onChange={(e) => change("name", e.target.value)}
-              placeholder="Enter Name"
-            />
-          </div>
-          <div>
-            <Label>Gender</Label>
-            <div className="flex items-center gap-6 pt-2">
-              <Radio
-                name="g2"
-                checked={form.gender === "Male"}
-                label="Male"
-                onChange={() => change("gender", "Male")}
-              />
-              <Radio
-                name="g2"
-                checked={form.gender === "Female"}
-                label="Female"
-                onChange={() => change("gender", "Female")}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Address</Label>
-            <Select
-              value={form.district}
-              onChange={(e) => change("district", e.target.value)}
-            >
-              <option value="">District</option>
-              <option>Dhaka</option>
-              <option>Chittagong</option>
-            </Select>
-          </div>
-          <div className="mt-6 md:mt-0">
-            <Select
-              value={form.subdistrict}
-              onChange={(e) => change("subdistrict", e.target.value)}
-            >
-              <option value="">Sub District</option>
-              <option>Dhamrai</option>
-              <option>Fakirhat</option>
-            </Select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Phone</Label>
-            <Input
-              value={form.phone}
-              onChange={(e) => change("phone", e.target.value)}
-              placeholder="Number"
-            />
-          </div>
-          <div>
-            <Label>Date of Birth</Label>
-            <Input
-              type="date"
-              value={form.dob}
-              onChange={(e) => change("dob", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Password</Label>
-            <Input
-              type="password"
-              value={form.pass}
-              onChange={(e) => change("pass", e.target.value)}
-            />
-          </div>
-          <div>
-            <Label>Re-Enter Password</Label>
-            <Input
-              type="password"
-              value={form.pass2}
-              onChange={(e) => change("pass2", e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div>
-          <Label>About Me</Label>
-          <textarea
-            value={form.about}
-            onChange={(e) => change("about", e.target.value)}
-            rows={4}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-            placeholder="Write about yourself"
-          />
-        </div>
-
-        <div className="pt-1 font-medium text-slate-700">Payment Details</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>Payment Method</Label>
-            <Select
-              value={form.payMethod}
-              onChange={(e) => change("payMethod", e.target.value)}
-            >
-              <option value="">Choose Payment Method</option>
-              <option>Bkash</option>
-              <option>Bank</option>
-            </Select>
-          </div>
-          <div>
-            <Label>Bkash No.</Label>
-            <Input
-              value={form.bkashNo}
-              onChange={(e) => change("bkashNo", e.target.value)}
-              placeholder="Bkash No."
-            />
-          </div>
-          <div>
-            <Label>Bkash Name</Label>
-            <Input
-              value={form.bkashName}
-              onChange={(e) => change("bkashName", e.target.value)}
-              placeholder="Bkash Name"
-            />
-          </div>
-          <div>
-            <Label>Bank Name</Label>
-            <Input
-              value={form.bank}
-              onChange={(e) => change("bank", e.target.value)}
-              placeholder="Bank Name"
-            />
-          </div>
-          <div>
-            <Label>Bank A/C No.</Label>
-            <Input
-              value={form.bankAcc}
-              onChange={(e) => change("bankAcc", e.target.value)}
-              placeholder="Bank A/C No."
-            />
-          </div>
-          <div>
-            <Label>Account Title</Label>
-            <Input
-              value={form.accTitle}
-              onChange={(e) => change("accTitle", e.target.value)}
-              placeholder="Account Title"
-            />
-          </div>
-        </div>
-
-        <div className="pt-1 font-medium text-slate-700">Select Role</div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label>Occupation</Label>
-            <Input
-              value={form.occupation}
-              onChange={(e) => change("occupation", e.target.value)}
-              placeholder="Occupation"
-            />
-          </div>
-          <div>
-            <Label>Department</Label>
-            <Input
-              value={form.department}
-              onChange={(e) => change("department", e.target.value)}
-              placeholder="Department"
-            />
-          </div>
-          <div>
-            <Label>Registration Number</Label>
-            <Input
-              value={form.regNo}
-              onChange={(e) => change("regNo", e.target.value)}
-              placeholder="Registration Number"
-            />
-          </div>
-        </div>
-
-        <ActionsRow onCancel={onClose} onSave={() => onClose()} />
-      </div>
-    </Modal>
-  )
-}
-
-function ModeratorModal({ open, onClose }) {
-  const [form, setForm] = useState({
-    name: "",
-    gender: "Male",
-    district: "",
-    subdistrict: "",
-    phone: "",
-    dob: "",
-    pass: "",
-    pass2: "",
-  })
-  const change = (k, v) => setForm((s) => ({ ...s, [k]: v }))
-
-  return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title="Moderator Info"
-      widthClass="max-w-xl"
-    >
-      <div className="grid grid-cols-1 gap-4">
-        <div>
-          <Label>Name</Label>
-          <Input
-            value={form.name}
-            onChange={(e) => change("name", e.target.value)}
-            placeholder="Enter Name"
-          />
-        </div>
-        <div>
-          <Label>Gender</Label>
-          <div className="flex items-center gap-6">
-            <Radio
-              name="g3"
-              checked={form.gender === "Male"}
-              label="Male"
-              onChange={() => change("gender", "Male")}
-            />
-            <Radio
-              name="g3"
-              checked={form.gender === "Female"}
-              label="Female"
-              onChange={() => change("gender", "Female")}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Address</Label>
-            <Select
-              value={form.district}
-              onChange={(e) => change("district", e.target.value)}
-            >
-              <option value="">District</option>
-              <option>Dhaka</option>
-              <option>Chittagong</option>
-            </Select>
-          </div>
-          <div className="mt-6 md:mt-0">
-            <Select
-              value={form.subdistrict}
-              onChange={(e) => change("subdistrict", e.target.value)}
-            >
-              <option value="">Sub District</option>
-              <option>Dhamrai</option>
-              <option>Fakirhat</option>
-            </Select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Phone</Label>
-            <Input
-              value={form.phone}
-              onChange={(e) => change("phone", e.target.value)}
-              placeholder="Number"
-            />
-          </div>
-          <div>
-            <Label>Date of Birth</Label>
-            <Input
-              type="date"
-              value={form.dob}
-              onChange={(e) => change("dob", e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label>Password</Label>
-            <Input
-              type="password"
-              value={form.pass}
-              onChange={(e) => change("pass", e.target.value)}
-            />
-          </div>
-          <div>
-            <Label>Re-Enter Password</Label>
-            <Input
-              type="password"
-              value={form.pass2}
-              onChange={(e) => change("pass2", e.target.value)}
-            />
-          </div>
-        </div>
-        <ActionsRow onCancel={onClose} onSave={() => onClose()} />
-      </div>
-    </Modal>
-  )
-}

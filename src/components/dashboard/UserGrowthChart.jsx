@@ -11,45 +11,45 @@ import {
   ReferenceArea,
 } from "recharts"
 
-const monthlyByYear = {
-  2024: [
-    { label: "Jan", getters: 500, providers: 1100 },
-    { label: "Feb", getters: 1200, providers: 2000 },
-    { label: "Mar", getters: 2000, providers: 1700 },
-    { label: "Apr", getters: 1600, providers: 2300 },
-    { label: "May", getters: 1900, providers: 2100 },
-    { label: "Jun", getters: 3100, providers: 1100 },
-    { label: "Jul", getters: 2300, providers: 2900 },
-    { label: "Aug", getters: 1800, providers: 2700 },
-    { label: "Sep", getters: 2000, providers: 1900 },
-    { label: "Oct", getters: 1700, providers: 1600 },
-    { label: "Nov", getters: 2100, providers: 2000 },
-    { label: "Dec", getters: 2400, providers: 800 },
-  ],
-  2025: [
-    { label: "Jan", getters: 600, providers: 1200 },
-    { label: "Feb", getters: 1400, providers: 2100 },
-    { label: "Mar", getters: 2300, providers: 1800 },
-    { label: "Apr", getters: 1700, providers: 2600 },
-    { label: "May", getters: 2100, providers: 2200 },
-    { label: "Jun", getters: 3562, providers: 1236 },
-    { label: "Jul", getters: 2400, providers: 3100 },
-    { label: "Aug", getters: 1900, providers: 2800 },
-    { label: "Sep", getters: 2100, providers: 2000 },
-    { label: "Oct", getters: 1800, providers: 1700 },
-    { label: "Nov", getters: 2200, providers: 2100 },
-    { label: "Dec", getters: 2600, providers: 900 },
-  ],
-}
+// const monthlyByYear = {
+//   2024: [
+//     { label: "Jan", getters: 500, providers: 1100 },
+//     { label: "Feb", getters: 1200, providers: 2000 },
+//     { label: "Mar", getters: 2000, providers: 1700 },
+//     { label: "Apr", getters: 1600, providers: 2300 },
+//     { label: "May", getters: 1900, providers: 2100 },
+//     { label: "Jun", getters: 3100, providers: 1100 },
+//     { label: "Jul", getters: 2300, providers: 2900 },
+//     { label: "Aug", getters: 1800, providers: 2700 },
+//     { label: "Sep", getters: 2000, providers: 1900 },
+//     { label: "Oct", getters: 1700, providers: 1600 },
+//     { label: "Nov", getters: 2100, providers: 2000 },
+//     { label: "Dec", getters: 2400, providers: 800 },
+//   ],
+//   2025: [
+//     { label: "Jan", getters: 600, providers: 1200 },
+//     { label: "Feb", getters: 1400, providers: 2100 },
+//     { label: "Mar", getters: 2300, providers: 1800 },
+//     { label: "Apr", getters: 1700, providers: 2600 },
+//     { label: "May", getters: 2100, providers: 2200 },
+//     { label: "Jun", getters: 3562, providers: 1236 },
+//     { label: "Jul", getters: 2400, providers: 3100 },
+//     { label: "Aug", getters: 1900, providers: 2800 },
+//     { label: "Sep", getters: 2100, providers: 2000 },
+//     { label: "Oct", getters: 1800, providers: 1700 },
+//     { label: "Nov", getters: 2200, providers: 2100 },
+//     { label: "Dec", getters: 2600, providers: 900 },
+//   ],
+// }
 
-const yearly = [
-  { label: "2019", getters: 8200, providers: 5200 },
-  { label: "2020", getters: 11400, providers: 9100 },
-  { label: "2021", getters: 15600, providers: 13200 },
-  { label: "2022", getters: 9800, providers: 7400 },
-]
+// const yearly = [
+//   { label: "2019", getters: 8200, providers: 5200 },
+//   { label: "2020", getters: 11400, providers: 9100 },
+//   { label: "2021", getters: 15600, providers: 13200 },
+//   { label: "2022", getters: 9800, providers: 7400 },
+// ]
 
-export default function UserGrowthChart({ period = "Monthly", year = 2025 }) {
+export default function UserGrowthChart({ period = "Monthly", year = new Date().getFullYear(), monthlyByYear, yearly }) {
   const data = period === "Monthly" ? monthlyByYear[year] || [] : yearly
   const highlightIndex =
     period === "Monthly" ? data.findIndex((d) => d.label === "Jun") : -1

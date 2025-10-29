@@ -40,7 +40,11 @@ export default function PopoverConfirm({
             onYes?.()
             onClose?.()
           }}
-          className="rounded-lg bg-rose-500 px-4 py-1.5 text-xs font-medium text-white hover:bg-rose-600"
+          className={`rounded-lg ${
+            title.includes("Approve")
+              ? "bg-blue-500 hover:bg-blue-600"
+              : "bg-rose-500 hover:bg-rose-600"
+          } px-4 py-1.5 text-xs font-medium text-white `}
         >
           Yes
         </button>

@@ -2,6 +2,7 @@ export function Label({ children }) {
   return <label className="block text-sm text-slate-600 mb-1">{children}</label>
 }
 export function Input(props) {
+  // Pass through name, value, onChange, type, etc.
   return (
     <input
       {...props}
@@ -22,13 +23,14 @@ export function Select({ children, ...props }) {
     </select>
   )
 }
-export function Radio({ label, ...props }) {
+export function Radio({ label, className = "", ...props }) {
+  // IMPORTANT: forward `name`, `value`, `checked`, `onChange`
   return (
-    <label className="inline-flex items-center gap-2">
+    <label className={"inline-flex items-center gap-2 " + className}>
       <input type="radio" {...props} className="accent-blue-600" />
       <span className="text-sm text-slate-700">{label}</span>
     </label>
-  )
+  );
 }
 export function ActionsRow({
   onCancelText = "Cancel",

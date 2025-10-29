@@ -65,14 +65,14 @@ export default function ComplaintInfoModal({ open, onClose, data }) {
             onClick={onClose}
             className="rounded-lg border px-6 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
           >
-            Cancel
+            Close
           </button>
-          <button
+          {/* <button
             onClick={onClose}
             className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
           >
             Done
-          </button>
+          </button> */}
         </div>
       </div>
     </Modal>
