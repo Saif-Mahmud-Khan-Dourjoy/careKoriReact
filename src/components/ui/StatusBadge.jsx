@@ -11,11 +11,12 @@ export default function StatusBadge({ status = "Pending" }) {
     >
       <span
         className={
-          "h-1.5 w-1.5 rounded-full " +
-          (isResolved ? "bg-emerald-500" : "bg-rose-400")
+          isResolved
+            ? "bg-emerald-500 relative -ml-[10px]"
+            : " h-1.5 w-1.5 rounded-full bg-rose-400"
         }
       />
-      {isResolved ? "Resolved" : "Pending"}
+      {isResolved ? "✔ Resolved" : "Pending"}
     </span>
   )
 }

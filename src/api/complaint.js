@@ -17,3 +17,21 @@ export const getAllComplaintsApi = () => {
       }
     })
 }
+
+export const updateComplaintStatusApi = (complaintId, data) => {
+  return api
+    .put(`/change-complaint-status/${complaintId}`, data)
+    .then((res) => [true, res?.data])
+    .catch((error) => {
+      if (error.response) {
+        return [
+          false,
+          error.response.data?.message || "Failed to update complaint status",
+        ]
+      } else if (error.request) {
+        return [false, "No response from server"]
+      } else {
+        return [false, error.message || "Error updating complaint status"]
+      }
+    })
+}

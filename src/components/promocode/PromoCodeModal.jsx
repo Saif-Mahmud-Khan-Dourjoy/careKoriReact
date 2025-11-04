@@ -162,7 +162,7 @@ export default function PromoCodeUpsertModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? "Save / Assign Promocode" : "Create / Assign Promocode"}
+      title={isEdit ? "Edit / Assign Promocode" : "Create / Assign Promocode"}
       widthClass="max-w-3xl"
     >
       <form onSubmit={f.handleSubmit} className="grid grid-cols-1 gap-6">

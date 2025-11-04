@@ -6,6 +6,8 @@ import { useOutletContext } from "react-router-dom"
 import { createPromoCodeApi, deletePromoCodeApi, getAllPromoCodeApi, getAllRolesForPromoCodeApi, getAllUsersApi, getProviderRolesSpecialityApi, updatePromoCodeApi } from "../api/promocode"
 import LoaderModal from "../components/ui/LoaderModal"
 import StatusModal from "../components/ui/StatusModal"
+import searchIcon from "/images/searchIcon.png"
+import addIcon from "/images/user-add.png"
 
 
 const formatPromoData = (apiData) => {
@@ -90,8 +92,8 @@ const formatPromoData = (apiData) => {
   })
 }
 
-const Th = ({ children }) => (
-  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
+const Th = ({ children, className="" }) => (
+  <th className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 ${className}`}>
     {children}
   </th>
 )
@@ -280,33 +282,35 @@ export default function PromoCodes() {
   }, [q, rows])
 
   return (
-    <div className="space-y-4">
+    <div className="">
       {/* header actions */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            🔎
-          </span>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search Promo Codes"
-            className="w-96 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <button
-          onClick={() => setModal({ open: true, initial: null })}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-700"
-        >
-          👤➕ Create New Code
-        </button>
-      </div>
 
       {/* table */}
-      <div className="rounded-xl border bg-white overflow-x-auto">
+      <div className="rounded-lg shadow-md bg-white overflow-x-auto px-3 pb-2">
+        <div className="flex items-center justify-between gap-3 pt-4 px-3 mb-6">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <img src={searchIcon} alt="Search" />
+            </span>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search Promo Codes"
+              className="w-96 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+
+          <button
+            onClick={() => setModal({ open: true, initial: null })}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-700"
+          >
+            <div className="flex gap-3">
+              <img src={addIcon} alt="Create New Code" /> Create New Code
+            </div>
+          </button>
+        </div>
         <table className="min-w-full">
-          <thead className="border-b bg-slate-50">
+          <thead className=" bg-white">
             <tr>
               <Th>No.</Th>
               <Th>Code</Th>
@@ -314,12 +318,12 @@ export default function PromoCodes() {
               <Th>Assigned To</Th>
               <Th>Validity</Th>
               <Th>Status</Th>
-              <Th>Action</Th>
+              <Th className="text-center">Action</Th>
             </tr>
           </thead>
           <tbody>
             {filteredPromo.map((r, idx) => (
-              <tr key={r?.id} className="border-b last:border-0">
+              <tr key={r?.id} className=" last:border-0">
                 <Td>{idx + 1}</Td>
                 <Td className="font-medium">{r?.code}</Td>
                 <Td className={r?.discountType === "amount" ? "" : ""}>
@@ -342,10 +346,10 @@ export default function PromoCodes() {
                 <Td>
                   <StatusDot active={r?.is_active} />
                 </Td>
-                <Td>
+                <Td className="flex justify-center">
                   <div className="flex items-center gap-2">
                     <button
-                      className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                      className="rounded border-slate-500 bg-white px-3 py-1.5 text-xs hover:bg-slate-50"
                       onClick={() => setModal({ open: true, initial: r })}
                     >
                       Edit
@@ -360,7 +364,7 @@ export default function PromoCodes() {
                         />
                       </div>
                       <button
-                        className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                        className="rounded border-slate-500 bg-white px-3 py-1.5 text-xs hover:bg-slate-50"
                         onClick={() =>
                           setDeleteAnchor((cur) => (cur === r.id ? null : r.id))
                         }

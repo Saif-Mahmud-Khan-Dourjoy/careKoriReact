@@ -3,6 +3,11 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import Modal from "../ui/Modal"
 import { ActionsRow, Input, Label, Radio } from "../ui/Fields"
+import deleteIcon from "/images/delete.png"
+import editIcon from "/images/edit.png"
+
+import blockIcon from "/images/block.png"
+import noImage from "/images/noImage.png"
 
 const validationSchema = Yup.object({
   name: Yup.string()
@@ -11,7 +16,7 @@ const validationSchema = Yup.object({
   email: Yup.string().email("Invalid email").notRequired(),
   phone: Yup.string().required("Phone is required"),
   password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 6 characters")
     .when("isEdit", {
       is: false,
       then: (schema) => schema.required("Password is required"),
@@ -132,10 +137,26 @@ export default function ModeratorModal({
     <Modal
       open={open}
       onClose={onClose}
-      title={initial?.role_id ? "Update Moderator" : "Add Moderator"}
+      title={initial?.role_id ? "Moderator Details" : "Add Moderator"}
       widthClass="max-w-xl"
     >
       <form onSubmit={formik.handleSubmit} className="grid grid-cols-1 gap-4">
+         {isEdit && (
+                            <div className="flex items-center flex-col gap-6 mt-6 mb-6">
+                              <div>
+                                <img
+                                  src={initial?.moderator_profile?.avatar || noImage}
+                                  alt=""
+                                  className="h-24 w-24 rounded-full object-cover"
+                                />
+                              </div>
+                              <div className="flex gap-3 justify-center">
+                                <img src={deleteIcon} alt="Delete" className="h-4 w-4" />
+                                <img src={editIcon} alt="Edit" className="h-4 w-4" />
+                                <img src={blockIcon} alt="Block" className="h-4 w-4" />
+                              </div>
+                            </div>
+                          )}
         <div>
           <Label>Name</Label>
           <Input
@@ -252,6 +273,7 @@ export default function ModeratorModal({
             </div>
           </div>
         )}
+        {!isEdit && (
         <div>
           <Label>Avatar</Label>
           <Input type="file" accept="image/*" onChange={handleAvatarChange} />
@@ -264,6 +286,7 @@ export default function ModeratorModal({
             />
           )}
         </div>
+        )}
         <ActionsRow
           onCancel={onClose}
           onSave={formik.handleSubmit}

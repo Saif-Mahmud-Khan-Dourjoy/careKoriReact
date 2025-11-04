@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 
 import StatusBadge from "../components/ui/StatusBadge"
 import ComplaintInfoModal from "../components/complaints/ComplaintInfoModal"
 import { useOutletContext } from "react-router-dom"
-import { getAllComplaintsApi } from "../api/complaint"
+import { getAllComplaintsApi, updateComplaintStatusApi } from "../api/complaint"
 import LoaderModal from "../components/ui/LoaderModal"
+import searchIcon from "/images/searchIcon.png"
+import StatusModal from "../components/ui/StatusModal"
+
 
 
  const normalizeComplaint = (complaint) => {
@@ -94,8 +97,8 @@ import LoaderModal from "../components/ui/LoaderModal"
 
 // ]
 
-const Th = ({ children }) => (
-  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500">
+const Th = ({ children, className = "" }) => (
+  <th className={`px-4 py-3 text-left text-xs font-semibold text-slate-500 ${className}`}>
     {children}
   </th>
 )
@@ -113,6 +116,10 @@ export default function Complaints() {
     const [complaints, setComplaints] = useState([])
     const [loading, setLoading] = useState(false)
     const [filteredComplaints, setFilteredComplaints] = useState([])
+    const [errorMsg, setErrorMsg] = useState(null)
+    const [statusModalOpen, setStatusModalOpen] = useState(false)
+    const [statusModalSuccess, setStatusModalSuccess] = useState(false)
+
 
     useEffect(() => {
       setHeader({
@@ -184,6 +191,37 @@ export default function Complaints() {
     return () => clearTimeout(handler)
   }, [q, complaints])
 
+  const updateStatus = async (complaintId) => {
+   
+    setLoading(true)
+    
+      const [success, data] = await updateComplaintStatusApi(
+        complaintId,
+        { status: "resolved", _method: "PUT" }
+      )
+       if (success) {
+         console.log("Updated successfully:", data)
+         setLoading(false)
+         setStatusModalSuccess(true)
+         setStatusModalOpen(true)
+       } else {
+         console.error("Failed to update getter:", data)
+         setErrorMsg(data)
+         setLoading(false)
+         setStatusModalSuccess(false)
+         setStatusModalOpen(true)
+       }
+    }
+
+    const closeStatusModal = () => {
+      setStatusModalOpen(false)
+      setErrorMsg(null)
+   if (statusModalSuccess) {
+        setLoading(true)
+        getComplaints().finally(() => setLoading(false))
+      }
+    }
+
   return (
     <>
       <LoaderModal
@@ -193,18 +231,28 @@ export default function Complaints() {
         dimBackdrop
         blurBackdrop
       />
+       <StatusModal
+         open={statusModalOpen}
+         onClose={closeStatusModal}
+         success={statusModalSuccess}
+         errorMsg={errorMsg}
+       />
+           
       <div className="space-y-4">
         {/* tabs (single) + search */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 w-full">
             <button className="rounded-full bg-blue-600 px-4 py-1.5 text-sm text-white">
               Complaints
             </button>
           </div>
+        </div>
 
-          <div className="relative">
+        {/* table */}
+        <div className="rounded-lg shadow-md bg-white overflow-x-auto pt-4 px-3">
+          <div className="relative px-3 mb-6">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-              🔎
+              <img src={searchIcon} alt="Search" className="pl-2" />
             </span>
             <input
               value={q}
@@ -213,12 +261,8 @@ export default function Complaints() {
               className="w-80 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
             />
           </div>
-        </div>
-
-        {/* table */}
-        <div className="rounded-xl border bg-white overflow-x-auto">
           <table className="min-w-full">
-            <thead className="border-b bg-slate-50">
+            <thead className=" bg-white">
               <tr>
                 <Th>No.</Th>
                 <Th>Complaint ID</Th>
@@ -227,12 +271,12 @@ export default function Complaints() {
                 <Th>Date & Time</Th>
                 <Th>Message</Th>
                 <Th>Status</Th>
-                <Th>Action</Th>
+                <Th className="text-center">Action</Th>
               </tr>
             </thead>
             <tbody>
               {filteredComplaints.map((r, idx) => (
-                <tr key={r.id} className="border-b last:border-0">
+                <tr key={r.id} className=" last:border-0">
                   <Td>{idx + 1}</Td>
                   <Td>
                     <span className="font-medium">{r?.complaintId}</span>
@@ -252,27 +296,23 @@ export default function Complaints() {
                   <Td>
                     <StatusBadge status={r?.status} />
                   </Td>
-                  <Td>
-                    <div className="flex items-center gap-2">
+                  <Td className="flex justify-center">
+                    <div className="flex items-center gap-4">
                       <button
-                        className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                        className="rounded bg-white border-slate-500 text-blue-400 px-3 py-1.5 text-xs hover:bg-slate-50"
                         onClick={() => setModal({ open: true, data: r })}
                       >
                         Details
                       </button>
-
-                      {/* <button
-                      title="Mark resolved"
-                      className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 text-white text-xs hover:bg-emerald-600"
-                      onClick={() => {
-                      
-                        const idx = seed.findIndex((x) => x.id === r.id)
-                        if (idx > -1) seed[idx].status = "Resolved"
-                        setQ((s) => s + "") 
-                      }}
-                    >
-                      ✓
-                    </button> */}
+                      {r.status !== "Resolved" && (
+                        <button
+                          title="Mark resolved"
+                          className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 text-white text-xs hover:bg-emerald-600 border-none focus:outline-none focus:ring-0"
+                          onClick={() => updateStatus(r?.complaintId)}
+                        >
+                          ✓
+                        </button>
+                      )}
                     </div>
                   </Td>
                 </tr>

@@ -3,6 +3,9 @@ import FilterDropdown from "../components/revenue/FilterDropdown"
 import RecordPaymentModal from "../components/revenue/RecordPaymentModal"
 import RevenueDetailsModal from "../components/revenue/RevenueDetailsModal"
 import { useOutletContext } from "react-router-dom"
+import searchIcon from "/images/searchIcon.png"
+
+import addIcon from "/images/user-add.png"
 
 const avatars = [
   "https://i.pravatar.cc/64?img=1",
@@ -123,35 +126,36 @@ export default function RevenueTransactions() {
         />
       </div>
 
-      {/* search + actions */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div className="relative">
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-            🔎
-          </span>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by Name, Phone Number or ID"
-            className="w-auto sm:w-96 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <FilterDropdown onChange={setFilter} />
-          <button
-            onClick={() => setShowRecord(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-700"
-          >
-            ⊕ Record Payment
-          </button>
-        </div>
-      </div>
-
       {/* table */}
-      <div className="rounded-xl border bg-white overflow-x-auto">
-        <table className="min-w-full">
-          <thead className="border-b bg-slate-50">
+      <div className="rounded-lg  bg-white overflow-x-auto shadow-md">
+        {/* search + actions */}
+        <div className="flex items-center justify-between gap-3 flex-wrap mt-5 px-3 mb-8">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <img src={searchIcon} alt="Search" />
+            </span>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search by Name, Phone Number or ID"
+              className="w-auto sm:w-96 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <FilterDropdown onChange={setFilter} />
+            <button
+              onClick={() => setShowRecord(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-700"
+            >
+              <div className="flex gap-2">
+                <img src={addIcon} alt="Add Record" />  Record Payment
+              </div>
+            </button>
+          </div>
+        </div>
+        <table className="min-w-full ">
+          <thead className=" bg-white">
             <tr>
               <Th>No.</Th>
               <Th>Name & ID</Th>
@@ -167,7 +171,7 @@ export default function RevenueTransactions() {
           </thead>
           <tbody>
             {list.map((r, i) => (
-              <tr key={r.id} className="border-b last:border-0">
+              <tr key={r.id} className=" last:border-0">
                 <Td>{i + 1}</Td>
                 <Td>
                   <div className="flex items-center gap-3">
@@ -237,8 +241,8 @@ function Card({ color = "emerald", title, value }) {
 
   return (
     <div className={`rounded-2xl ${tone} ring-1 p-5`}>
-      <div className="text-sm opacity-70">{title}</div>
-      <div className="mt-2 text-3xl font-bold">{value.toLocaleString()}</div>
+      <div className="text-sm opacity-70 text-black">{title}</div>
+      <div className="mt-2 text-3xl font-bold text-black">{value.toLocaleString()}</div>
     </div>
   )
 }

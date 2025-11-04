@@ -1,4 +1,4 @@
-import {  use, useCallback, useEffect, useState } from "react"
+import {  useCallback, useEffect, useState } from "react"
 import { useOutletContext } from "react-router-dom"
 import RevenueProfitChart from "../components/dashboard/RevenueProfitChart";
 import UserGrowthChart from "../components/dashboard/UserGrowthChart";
@@ -10,6 +10,13 @@ import { approveProviderApi, deleteProviderApi, getAppointmentCountApi, getAppro
 import LoaderModal from "../components/ui/LoaderModal"
 import ConfirmModal from "../components/ui/ConfirmModal"
 import StatusModal from "../components/ui/StatusModal"
+
+import user from "/images/profile-2user.png"
+import appointment from "/images/appIcon.png"
+import service from "/images/serviceIcon.png"
+import search from "/images/searchIcon.png"
+
+
 
 
 
@@ -176,7 +183,7 @@ export default function Dashboard() {
     if (success) {
       let createData = [
         {
-          label: "Customers",
+          label: "Getters",
           value: data?.getters,
           color: "bg-blue-50 text-blue-700",
         },
@@ -418,16 +425,23 @@ export default function Dashboard() {
       <div className="space-y-6">
         {/* KPI cards */}
         <section className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <KpiCard title="Total Users" total={totalUsers} pills={userData} />
+          <KpiCard
+            title="Total Users"
+            total={totalUsers}
+            pills={userData}
+            icon={user}
+          />
           <KpiCard
             title="Total Appointments"
             total={totalAppointments}
             pills={appointmentData}
+            icon={appointment}
           />
           <KpiCard
             title="Total Services & Sub Services"
             total={totalServiceSubService}
             pills={serviceSubServiceData}
+            icon={service}
           />
         </section>
 
@@ -481,15 +495,15 @@ export default function Dashboard() {
         </section>
 
         {/* approvals */}
-        <section className="bg-white rounded-xl border">
-          <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="text-sm font-semibold text-slate-700">
+        <section className="bg-white rounded-xl ">
+          <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b">
+            <div className="text-sm font-semibold  bg-blue-500 py-2 px-3 rounded-full text-white ">
               Approval Requests
             </div>
             <div className="flex items-center gap-2 w-full sm:w-96">
               <div className="relative flex-1">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                  🔎
+                  <img src={search} alt="" />
                 </span>
                 <input
                   value={searchTerm}
@@ -508,9 +522,9 @@ export default function Dashboard() {
           </div>
 
           {/* table */}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto pt-3">
             <table className="min-w-full text-sm">
-              <thead className="bg-slate-50 text-slate-600">
+              <thead className=" text-slate-600">
                 <tr>
                   {[
                     "Department",
@@ -531,10 +545,12 @@ export default function Dashboard() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="">
                 {filteredProviders.map((r, i) => (
-                  <tr key={i} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium">{r.department}</td>
+                  <tr key={i} className="hover:bg-slate-50 text-[#777373]">
+                    <td className="px-4 py-3 font-medium text-slate-600">
+                      {r.department}
+                    </td>
                     <td className="px-4 py-3">{r.phone}</td>
                     <td className="px-4 py-3">{r.reg}</td>
                     <td className="px-4 py-3">{r.gender}</td>

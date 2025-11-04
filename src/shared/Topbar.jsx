@@ -1,45 +1,6 @@
-// // src/shared/Topbar.jsx
-// import logo from "../assets/logo.jpg"
-// import { useAuth } from "../context/AuthContext"
 
-// export default function Topbar({ onMenu }) {
-//   const { user } = useAuth()
-//   return (
-//     <header className="sticky top-0 z-30 bg-white border-b">
-//       <div className="mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-//         <div className="flex items-center gap-3">
-//           <button
-//             className="md:hidden rounded p-2 hover:bg-slate-100"
-//             onClick={onMenu}
-//             aria-label="Open menu"
-//           >
-//             ☰
-//           </button>
-//           <img src={logo} alt="CareKori" className="h-7 w-auto" />
-//         </div>
 
-//         <div className="flex items-center gap-3">
-//           <div className="text-right hidden sm:block">
-//             <div className="text-sm font-semibold">
-//               {user?.name || "Emma Wilson"}
-//             </div>
-//             <div className="text-xs text-slate-500">
-//               {user?.role?.name || "Account Admin"}
-//             </div>
-//           </div>
-//           <img
-//             src="https://i.pravatar.cc/40?img=12"
-//             className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100"
-//             alt="avatar"
-//           />
-//         </div>
-//       </div>
-//     </header>
-//   )
-// }
-
-// src/shared/Topbar.jsx
-import logo from "../assets/logo.jpg";
+import logo from "/images/logo.png"
 import { useAuth } from "../context/AuthContext";
 
 export default function Topbar({ title, subtitle, onMenu }) {
@@ -56,16 +17,17 @@ export default function Topbar({ title, subtitle, onMenu }) {
           >
             ☰
           </button>
-
-          <img src={logo} alt="CareKori" className="h-7 w-auto" />
+          
+            <img src={logo} alt="CareKori" className="h-10 w-auto ml-16 hidden  md:block" />
+          
 
           {/* dynamic header */}
-          <div className="md:ml-56">
-            <div className="text-sm sm:text-base font-semibold text-slate-800">
+          <div className="md:ml-[120px]">
+            <div className="text-sm sm:text-lg font-semibold text-blue-500">
               {title || "Welcome"}
             </div>
             {subtitle ? (
-              <div className="text-xs sm:text-sm text-slate-500 -mt-0.5">
+              <div className="text-xs text-slate-500 -mt-0.5 font-semibold">
                 {subtitle}
               </div>
             ) : null}

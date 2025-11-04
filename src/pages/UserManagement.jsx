@@ -13,6 +13,8 @@ import StatusModal from "../components/ui/StatusModal"
 import { useAuth } from "../context/AuthContext"
 import { approveProviderApi, deleteProviderApi } from "../api/dashboard"
 import { getProviderRolesSpecialityApi } from "../api/promocode"
+import addIcon from "/images/user-add.png"
+import searchIcon from "/images/searchIcon.png"
 
 
 
@@ -27,10 +29,10 @@ function Tabs({ value, onChange }) {
         <button
           key={t}
           onClick={() => onChange(t)}
-          className={`rounded-full px-4 py-1.5 text-sm transition ${
+          className={`rounded-full px-4 py-1.5 text-sm transition border-none focus:outline-none focus:ring-0 ${
             value === t
-              ? "bg-blue-600 text-white"
-              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              ? "bg-blue-600 text-white "
+              : " text-slate-700 bg-white hover:bg-slate-200"
           }`}
         >
           {t}
@@ -292,8 +294,8 @@ const groupAvailabilitiesLocal = (availabilities) => {
         };
       }
       grouped[key].time_slots.push({
-        start_time: s.start_time,
-        end_time: s.end_time,
+        start_time: s.start_time.slice(0,5),
+        end_time: s.end_time.slice(0,5),
       });
     }
   }
@@ -698,6 +700,7 @@ useEffect(() => {
 
 
 
+
   return (
     <>
       <LoaderModal
@@ -713,66 +716,72 @@ useEffect(() => {
         success={statusModalSuccess}
         errorMsg={errorMsg}
       />
-      <div className="space-y-4">
-        {/* tabs row + search + add button */}
-        <div className="flex items-center flex-wrap justify-between gap-3">
-          <Tabs
-            value={tab}
-            onChange={(t) => {
-              setTab(t)
-              setQ("")
-              setHeader({
-                title:
-                  t === "Getters"
-                    ? "Service Getter Management"
-                    : t === "Providers"
-                    ? "Service Provider Management"
-                    : "Moderator Management",
-                subtitle: "Here’s a summary of today.",
-              })
-            }}
-          />
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                🔎
-              </span>
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder={`Search ${tab}`}
-                className="w-auto sm:w-72 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-              />
-            </div>
-            {tab === "Getters" && (
-              <button
-                onClick={() => setAddGetterOpen(true)}
-                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
-              >
-                ⊕ Add Getter
-              </button>
-            )}
-            {tab === "Providers" && (
-              <button
-                onClick={() => setAddProviderOpen(true)}
-                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
-              >
-                ⊕ Add Provider
-              </button>
-            )}
-            {tab === "Moderators" && (
-              <button
-                onClick={() => setAddModeratorOpen(true)}
-                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5"
-              >
-                ⊕ Add Moderator
-              </button>
-            )}
+
+      <div className="py-3 px-5 mb-8 bg-white ">
+        <Tabs
+          value={tab}
+          onChange={(t) => {
+            setTab(t)
+            setQ("")
+            setHeader({
+              title:
+                t === "Getters"
+                  ? "Service Getter Management"
+                  : t === "Providers"
+                  ? "Service Provider Management"
+                  : "Moderator Management",
+              subtitle: "Here’s a summary of today.",
+            })
+          }}
+        />
+      </div>
+      <div>
+        <div className="flex justify-between items-center bg-white px-2 pt-4 ">
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <img src={searchIcon} alt="Search" />
+            </span>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder={`Search ${tab}`}
+              className="w-auto sm:w-72 rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+            />
           </div>
+          {tab === "Getters" && (
+            <button
+              onClick={() => setAddGetterOpen(true)}
+              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5 border-none focus:outline-none focus:ring-0"
+            >
+              <div className="flex gap-2">
+                <img src={addIcon} alt="" /> Add Getter
+              </div>
+            </button>
+          )}
+          {tab === "Providers" && (
+            <button
+              onClick={() => setAddProviderOpen(true)}
+              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5 border-none focus:outline-none focus:ring-0"
+            >
+              <div className="flex gap-2">
+                <img src={addIcon} alt="" /> Add Provider
+              </div>
+            </button>
+          )}
+          {tab === "Moderators" && (
+            <button
+              onClick={() => setAddModeratorOpen(true)}
+              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5 border-none focus:outline-none focus:ring-0"
+            >
+              <div className="flex gap-2">
+                <img src={addIcon} alt="" /> Add Moderator
+              </div>
+            </button>
+          )}
         </div>
 
         {/* table card */}
-        <div className="rounded-xl border bg-white">
+        <div className=" bg-white pt-6 pb-2 shadow-md">
           {tab === "Getters" && (
             <GetterTable
               rows={filteredGetters}
@@ -815,7 +824,9 @@ useEffect(() => {
         />
         <ProviderModal
           open={addProviderOpen}
-          onClose={() =>{ setAddProviderOpen(false) , setProviderInitial(null)}}
+          onClose={() => {
+            setAddProviderOpen(false), setProviderInitial(null)
+          }}
           initial={providerInitial}
           providerRoles={providerRoles}
           providerSpeciality={providerSpeciality}
@@ -864,8 +875,8 @@ function Th({ className=null, children }) {
     </th>
   )
 }
-function Td({ children }) {
-  return <td className="px-4 py-3 text-sm text-slate-700">{children}</td>
+function Td({ className=null, children }) {
+  return <td className={`px-4 py-3 text-sm text-slate-700 ${className}`}>{children}</td>
 }
 
 function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter }) {
@@ -885,8 +896,8 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
   };
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full">
-        <thead className="border-b bg-slate-50">
+      <table className="min-w-full ">
+        <thead className=" bg-white">
           <tr>
             <Th>No.</Th>
             <Th>Name & ID</Th>
@@ -894,17 +905,22 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
             <Th>Gender</Th>
             <Th>Date of Birth</Th>
             <Th>Address</Th>
-            <Th>Action</Th>
+            <Th className="text-center">Action</Th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="">
           {rows.map((r, i) => (
-            <tr key={r.id} className="border-b last:border-0">
+            <tr key={r.id} className=" last:border-0">
               <Td>{i + 1}</Td>
               <Td>
                 <div className="flex items-center gap-3">
-
-                {r?.customer_profile?.avatar && <img src={r.customer_profile.avatar} alt="" className="h-8 w-8 rounded-full" />}
+                  {r?.customer_profile?.avatar && (
+                    <img
+                      src={r.customer_profile.avatar}
+                      alt=""
+                      className="h-8 w-8 rounded-full"
+                    />
+                  )}
                   <div>
                     <span className="font-medium">{r.name}</span>
                     <span className="text-xs text-slate-400">{` (${r.unique_user_id})`}</span>
@@ -915,10 +931,10 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
               <Td>{r.customer_profile?.gender}</Td>
               <Td>{r.customer_profile?.dob}</Td>
               <Td>{r.customer_profile?.address}</Td>
-              <Td>
+              <Td className="flex justify-center ">
                 <div className="flex gap-2">
                   <button
-                    className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded  border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
                   >
                     Edit
@@ -931,7 +947,14 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
                         onYes={() => removeRow(r.unique_user_id)}
                       />
                     </div>
-                    <button className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 text-red-600 border-red-200" onClick={() => setDeleteGetterAnchor((cur) => (cur === r.id ? null : r.id))}>
+                    <button
+                      className="rounded border-slate-500 px-3 py-1.5 text-xs hover:border-red-400   hover:bg-red-50 "
+                      onClick={() =>
+                        setDeleteGetterAnchor((cur) =>
+                          cur === r.id ? null : r.id
+                        )
+                      }
+                    >
                       Delete
                     </button>
                   </div>
@@ -966,7 +989,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full">
-        <thead className="border-b bg-slate-50">
+        <thead className="bg-white">
           <tr>
             <Th>Phone</Th>
             <Th>Registration No.</Th>
@@ -979,7 +1002,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-b last:border-0">
+            <tr key={i} className=" last:border-0">
               <Td className="font-medium">{r.phone}</Td>
               <Td>
                 {r?.profile_type == "doctor"
@@ -992,8 +1015,8 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
               <Td>{r?.profile?.address}</Td>
               <Td>{r?.profile?.pricing}</Td>
               <Td>{r?.profile?.payment_type}</Td>
-              <Td>
-                <div className="flex gap-2 justify-end">
+              <Td >
+                <div className="flex gap-2 justify-center">
                   {(r?.profile?.active_status == 0 ||
                     r?.profile?.active_status == null ||
                     r?.profile?.active_status == false) && (
@@ -1028,16 +1051,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                           Accept
                         </button>
                       </div>
-                      {/* <button
-                        className=""
-                        onClick={() =>
-                          setRejectProviderAnchor((cur) =>
-                            cur === r.id ? null : r.id
-                          )
-                        }
-                      >
-                        Reject
-                      </button> */}
+                    
 
                       <div className="relative">
                         <div className="absolute right-0 top-[-190%] z-50">
@@ -1061,8 +1075,11 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                       </div>
                     </>
                   )}
+
+                  {(r?.profile?.active_status == 1 ) && (
+                      <>
                   <button
-                    className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
                   >
                     Edit
@@ -1076,7 +1093,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                       />
                     </div>
                     <button
-                      className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 text-red-600 border-red-200"
+                      className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 hover:border-red-500 border-slate-500"
                       onClick={() =>
                         setDeleteProviderAnchor((cur) =>
                           cur === r.id ? null : r.id
@@ -1086,6 +1103,8 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                       Delete
                     </button>
                   </div>
+                  </>
+                  )}
                 </div>
               </Td>
             </tr>
@@ -1108,7 +1127,7 @@ function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, remove
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full">
-        <thead className="border-b bg-slate-50">
+        <thead className="bg-white">
           <tr>
             <Th>No.</Th>
             <Th>ID</Th>
@@ -1116,12 +1135,12 @@ function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, remove
             <Th>Gender</Th>
             <Th>Date of Birth</Th>
             <Th>Name</Th>
-            <Th>Action</Th>
+            <Th className="text-center">Action</Th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-b last:border-0">
+            <tr key={i} className=" last:border-0">
               <Td>{i + 1}</Td>
               <Td>
                 <div className="flex items-center gap-3">
@@ -1144,9 +1163,9 @@ function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, remove
               <Td>{r?.moderator_profile?.dob}</Td>
               <Td>{r?.name}</Td>
               <Td>
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-center">
                   <button
-                    className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
                   >
                     Edit
@@ -1160,7 +1179,7 @@ function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, remove
                       />
                     </div>
                     <button
-                      className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 text-red-600 border-red-200"
+                      className="rounded border px-3 py-1.5 text-xs hover:bg-red-50  border-slate-500 hover:border-red-500"
                       onClick={() =>
                         setDeleteModeratorAnchor((cur) =>
                           cur === r.unique_user_id ? null : r.unique_user_id

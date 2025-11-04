@@ -4,7 +4,14 @@ import * as Yup from "yup"
 import SelectRS from "react-select"
 import Modal from "../ui/Modal"
 import { ActionsRow, Input, Label, Radio } from "../ui/Fields"
+import deleteIcon from "/images/delete.png"
+import editIcon from "/images/edit.png"
 
+import blockIcon from "/images/block.png"
+import noImage from "/images/noImage.png"
+
+
+// days array for availability options
 const days = [
   "monday",
   "tuesday",
@@ -71,7 +78,7 @@ export default function ProviderModal({
 
     // Password fields: required when creating, not required when editing
     password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
+      .min(8, "Password must be at least 6 characters")
       .when("isEdit", {
         is: false,
         then: (schema) => schema.required("Password is required"),
@@ -242,14 +249,18 @@ export default function ProviderModal({
       other_data: initial?.profile?.unique_identification?.other_data || "",
 
       // Availabilities
-      availabilities: initial?.availabilities || [
-        {
-          availability_type: "appointment",
-          day: "monday",
-          // slot_duration: "",
-          time_slots: [{ start_time: "09:00:00", end_time: "09:30:00" }],
-        },
-      ],
+      availabilities: !isEdit
+        ? [
+            {
+              availability_type: "appointment",
+              day: "monday",
+              // slot_duration: "",
+              time_slots: [{ start_time: "09:00", end_time: "09:30" }],
+            },
+          ]
+        : initial?.availabilities?.length > 0
+        ? initial?.availabilities
+        : [],
       isEdit,
     },
     enableReinitialize: true,
@@ -337,18 +348,33 @@ export default function ProviderModal({
 
   const providerSpecialityOptions = providerSpeciality?.[values?.role] || []
 
+ 
+
   return (
     <Modal
       open={open}
       onClose={onClose}
-      title={isEdit ? "Update Service Provider" : "Add Service Provider"}
+      title={isEdit ? "Service Provider details" : "Add Service Provider"}
       widthClass="max-w-5xl"
-      // modalType="large"
     >
-      {/* >>> Provide Formik context to FieldArray and friends <<< */}
       <FormikProvider value={formik}>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-          {/* Identity */}
+           {isEdit && (
+                    <div className="flex items-center flex-col gap-6 mt-6 mb-6">
+                      <div>
+                        <img
+                          src={initial?.profile?.avatar || noImage}
+                          alt=""
+                          className="h-24 w-24 rounded-full object-cover"
+                        />
+                      </div>
+                      <div className="flex gap-3 justify-center">
+                        <img src={deleteIcon} alt="Delete" className="h-4 w-4" />
+                        <img src={editIcon} alt="Edit" className="h-4 w-4" />
+                        <img src={blockIcon} alt="Block" className="h-4 w-4" />
+                      </div>
+                    </div>
+                  )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Name</Label>
@@ -504,7 +530,7 @@ export default function ProviderModal({
               <FieldError error={errors.pricing} touched={touched.pricing} />
             </div>
           </div>
-
+          {!isEdit && (
           <div>
             <div>
               <Label>Avatar</Label>
@@ -523,6 +549,7 @@ export default function ProviderModal({
               )}
             </div>
           </div>
+          )}
 
           {/* Payment */}
           <div className="pt-1 font-medium text-slate-700">Payment Details</div>
@@ -572,19 +599,6 @@ export default function ProviderModal({
                     touched={touched.payment_account_bkash}
                   />
                 </div>
-                {/* <div>
-                  <Label>Bkash Name</Label>
-                  <Input
-                    name="bkash_name"
-                    value={values.bkash_name}
-                    onChange={handleChange}
-                    placeholder="Account name"
-                  />
-                  <FieldError
-                    error={errors.bkash_name}
-                    touched={touched.bkash_name}
-                  />
-                </div> */}
               </>
             )}
 
@@ -864,20 +878,6 @@ export default function ProviderModal({
                           touched={touched.availabilities?.[idx]?.day}
                         />
                       </div>
-
-                      {/* <div>
-                        <Label>Slot Duration (min)</Label>
-                        <Input
-                          name={`availabilities[${idx}].slot_duration`}
-                          value={av.slot_duration ?? ""}
-                          onChange={handleChange}
-                          placeholder="e.g., 30"
-                        />
-                        <FieldError
-                          error={errors.availabilities?.[idx]?.slot_duration}
-                          touched={touched.availabilities?.[idx]?.slot_duration}
-                        />
-                      </div> */}
                     </div>
 
                     {/* Time slots */}
@@ -890,8 +890,8 @@ export default function ProviderModal({
                               type="button"
                               onClick={() =>
                                 pushSlot({
-                                  start_time: "09:00:00",
-                                  end_time: "09:30:00",
+                                  start_time: "09:00",
+                                  end_time: "09:30",
                                 })
                               }
                               className="text-sm text-blue-600 hover:underline"
@@ -975,8 +975,9 @@ export default function ProviderModal({
                     push({
                       availability_type: "appointment",
                       day: "monday",
-                      // slot_duration: "",
-                      time_slots: [{ start_time: "09:00:00", end_time: "09:30:00" }],
+                      time_slots: [
+                        { start_time: "09:00", end_time: "09:30" },
+                      ],
                     })
                   }
                   className="text-sm text-blue-600 hover:underline"
