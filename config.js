@@ -1,5 +1,5 @@
 let config = {
-  backendUrl:  "http://localhost:8000/api",
+  backendUrl:  "https://carekori-dev.techsolutionfactory.com/admin/public/api",
 }
 
 export default config
