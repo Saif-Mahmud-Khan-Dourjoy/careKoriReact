@@ -36,7 +36,7 @@ export default function FilterDropdown({ onChange }) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm hover:bg-slate-50  bg-white border-slate-500 focus:outline-none focus:ring-0"
+        className="inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm hover:bg-slate-50  bg-white border border-slate-500 focus:outline-none focus:ring-0"
       >
         <span>
           <img src={filterIcon} alt="Filter" />

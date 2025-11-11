@@ -22,7 +22,7 @@ export default function StatusModal({ open, onClose, success=null, errorMsg=null
       </div>
 
       <div className="flex justify-end p-6">
-        <button onClick={onClose} className="mr-4">
+        <button onClick={onClose} className="mr-4 border border-slate-500">
           Close
         </button>
       </div>

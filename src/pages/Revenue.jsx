@@ -203,7 +203,7 @@ export default function RevenueTransactions() {
                 </Td>
                 <Td>
                   <button
-                    className="rounded border px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => setDetails({ open: true, data: r })}
                   >
                     Details

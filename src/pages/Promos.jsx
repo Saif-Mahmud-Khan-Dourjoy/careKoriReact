@@ -349,7 +349,7 @@ export default function PromoCodes() {
                 <Td className="flex justify-center">
                   <div className="flex items-center gap-2">
                     <button
-                      className="rounded border-slate-500 bg-white px-3 py-1.5 text-xs hover:bg-slate-50"
+                      className="rounded border border-slate-500 bg-white px-3 py-1.5 text-xs hover:bg-slate-50"
                       onClick={() => setModal({ open: true, initial: r })}
                     >
                       Edit
@@ -364,7 +364,7 @@ export default function PromoCodes() {
                         />
                       </div>
                       <button
-                        className="rounded border-slate-500 bg-white px-3 py-1.5 text-xs hover:bg-slate-50"
+                        className="rounded border border-slate-500 bg-white px-3 py-1.5 text-xs  hover:border-red-400 hover:bg-red-50"
                         onClick={() =>
                           setDeleteAnchor((cur) => (cur === r.id ? null : r.id))
                         }

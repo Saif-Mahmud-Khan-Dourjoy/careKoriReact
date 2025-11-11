@@ -77,7 +77,9 @@ export const createPromoCodeApi = (payload) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.message || "Failed to create promo code",
+          error.response.data?.message ||
+            error?.response?.data?.details ||
+            "Failed to create promo code",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -95,7 +97,9 @@ export const updatePromoCodeApi = (id, payload) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.message || "Failed to update promo code",
+          error.response.data?.message ||
+            error?.response?.data?.details ||
+            "Failed to update promo code",
         ]
       } else if (error.request) {
         return [false, "No response from server"]

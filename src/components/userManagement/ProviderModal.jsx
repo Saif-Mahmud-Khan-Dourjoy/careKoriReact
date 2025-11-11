@@ -78,7 +78,7 @@ export default function ProviderModal({
 
     // Password fields: required when creating, not required when editing
     password: Yup.string()
-      .min(8, "Password must be at least 6 characters")
+      .min(8, "Password must be at least 8 characters")
       .when("isEdit", {
         is: false,
         then: (schema) => schema.required("Password is required"),
@@ -359,22 +359,22 @@ export default function ProviderModal({
     >
       <FormikProvider value={formik}>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-           {isEdit && (
-                    <div className="flex items-center flex-col gap-6 mt-6 mb-6">
-                      <div>
-                        <img
-                          src={initial?.profile?.avatar || noImage}
-                          alt=""
-                          className="h-24 w-24 rounded-full object-cover"
-                        />
-                      </div>
-                      <div className="flex gap-3 justify-center">
-                        <img src={deleteIcon} alt="Delete" className="h-4 w-4" />
-                        <img src={editIcon} alt="Edit" className="h-4 w-4" />
-                        <img src={blockIcon} alt="Block" className="h-4 w-4" />
-                      </div>
-                    </div>
-                  )}
+          {isEdit && (
+            <div className="flex items-center flex-col gap-6 mt-6 mb-6">
+              <div>
+                <img
+                  src={initial?.profile?.avatar || noImage}
+                  alt=""
+                  className="h-24 w-24 rounded-full object-cover"
+                />
+              </div>
+              <div className="flex gap-3 justify-center">
+                <img src={deleteIcon} alt="Delete" className="h-4 w-4" />
+                <img src={editIcon} alt="Edit" className="h-4 w-4" />
+                <img src={blockIcon} alt="Block" className="h-4 w-4" />
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Name</Label>
@@ -531,24 +531,24 @@ export default function ProviderModal({
             </div>
           </div>
           {!isEdit && (
-          <div>
             <div>
-              <Label>Avatar</Label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-              />
-              <FieldError error={errors.avatar} touched={touched.avatar} />
-              {avatarPreview && (
-                <img
-                  src={avatarPreview}
-                  alt="Avatar Preview"
-                  className="mt-2 h-20 w-20 object-cover rounded-full border"
+              <div>
+                <Label>Avatar</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarChange}
                 />
-              )}
+                <FieldError error={errors.avatar} touched={touched.avatar} />
+                {avatarPreview && (
+                  <img
+                    src={avatarPreview}
+                    alt="Avatar Preview"
+                    className="mt-2 h-20 w-20 object-cover rounded-full border"
+                  />
+                )}
+              </div>
             </div>
-          </div>
           )}
 
           {/* Payment */}
@@ -679,6 +679,8 @@ export default function ProviderModal({
                 }}
                 classNamePrefix="rs"
                 placeholder="Select Speciality"
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
               <FieldError
                 error={errors.doctor_speciality_id}
@@ -701,6 +703,8 @@ export default function ProviderModal({
                   setFieldValue("lawyer_speciality_id", e?.value ?? "")
                 }}
                 classNamePrefix="rs"
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
               <FieldError
                 error={errors.lawyer_speciality_id}
@@ -723,6 +727,8 @@ export default function ProviderModal({
                   setFieldValue("common_speciality_id", e?.value ?? "")
                 }}
                 classNamePrefix="rs"
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
               <FieldError
                 error={errors.common_speciality_id}
@@ -975,9 +981,7 @@ export default function ProviderModal({
                     push({
                       availability_type: "appointment",
                       day: "monday",
-                      time_slots: [
-                        { start_time: "09:00", end_time: "09:30" },
-                      ],
+                      time_slots: [{ start_time: "09:00", end_time: "09:30" }],
                     })
                   }
                   className="text-sm text-blue-600 hover:underline"

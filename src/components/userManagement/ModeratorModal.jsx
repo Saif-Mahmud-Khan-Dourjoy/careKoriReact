@@ -16,7 +16,7 @@ const validationSchema = Yup.object({
   email: Yup.string().email("Invalid email").notRequired(),
   phone: Yup.string().required("Phone is required"),
   password: Yup.string()
-    .min(8, "Password must be at least 6 characters")
+    .min(8, "Password must be at least 8 characters")
     .when("isEdit", {
       is: false,
       then: (schema) => schema.required("Password is required"),

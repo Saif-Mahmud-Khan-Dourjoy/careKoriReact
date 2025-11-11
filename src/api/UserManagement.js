@@ -29,7 +29,12 @@ export const addApi = (formData) => {
     .catch((error) => {
       if (error.response) {
         console.log('from',error.response)
-        return [false, error.response.data?.details || "Failed to add data"]
+        return [
+          false,
+          error?.response?.data?.message ||
+            error.response.data?.details ||
+            "Failed to add data",
+        ]
       } else if (error.request) {
         return [false, "No response from server"]
       } else {
@@ -68,7 +73,9 @@ export const updateGetterApi = (uniqueUserId, formData) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.details || "Failed to update getter",
+          error?.response?.data?.message ||
+            error.response.data?.details ||
+            "Failed to update getter",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -92,7 +99,9 @@ export const getAllModeratorsApi = () => {
       if (error.response) {
         return [
           false,
-          error.response.data?.message || "Failed to fetch moderators",
+          error.response.data?.message ||
+            error?.response?.data?.details ||
+            "Failed to fetch moderators",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -114,7 +123,9 @@ export const createModeratorApi = (formData) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.message || "Failed to add moderator",
+          error.response.data?.message ||
+            error?.response?.data?.details ||
+            "Failed to add moderator",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -154,7 +165,9 @@ export const updateModeratorApi = (uniqueUserId, formData) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.details || "Failed to update moderator",
+          error?.response?.data?.message ||
+            error.response.data?.details ||
+            "Failed to update moderator",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -212,7 +225,9 @@ export const updateDoctorApi = (uniqueUserId, formData) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.details || "Failed to update doctor",
+          error?.response?.data?.message ||
+            error.response.data?.details ||
+            "Failed to update doctor",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -234,7 +249,9 @@ export const updateLawyerApi = (uniqueUserId, formData) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.details || "Failed to update lawyer",
+          error?.response?.data?.message ||
+            error.response.data?.details ||
+            "Failed to update lawyer",
         ]
       } else if (error.request) {
         return [false, "No response from server"]
@@ -256,7 +273,9 @@ export const updateCommonApi = (uniqueUserId, formData) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.details || "Failed to update common",
+          error?.response?.data?.message ||
+            error.response.data?.details ||
+            "Failed to update common",
         ]
       } else if (error.request) {
         return [false, "No response from server"]

@@ -44,7 +44,7 @@ export function ActionsRow({
       <button
         type="button"
         onClick={onCancel}
-        className="rounded-lg border px-6 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+        className="rounded-lg border border-slate-500 px-6 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
       >
         {onCancelText}
       </button>

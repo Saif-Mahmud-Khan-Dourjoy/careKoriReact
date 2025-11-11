@@ -2,6 +2,7 @@
 
 import logo from "/images/logo.png"
 import { useAuth } from "../context/AuthContext";
+import avatar from "/images/avatar.png"
 
 export default function Topbar({ title, subtitle, onMenu }) {
   const { user } = useAuth()
@@ -17,9 +18,12 @@ export default function Topbar({ title, subtitle, onMenu }) {
           >
             ☰
           </button>
-          
-            <img src={logo} alt="CareKori" className="h-10 w-auto ml-16 hidden  md:block" />
-          
+
+          <img
+            src={logo}
+            alt="CareKori"
+            className="h-10 w-auto ml-16 hidden  md:block"
+          />
 
           {/* dynamic header */}
           <div className="md:ml-[120px]">
@@ -35,11 +39,20 @@ export default function Topbar({ title, subtitle, onMenu }) {
         </div>
 
         <div className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-full">
-          <img
-            src="https://i.pravatar.cc/40?img=12"
-            className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100"
-            alt="avatar"
-          />
+          {user?.role?.name === "super admin" ? (
+            <img
+              src={avatar}
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100"
+              alt="avatar"
+            />
+          ) : (
+            <img
+              src={user?.moderator_profile?.avatar || avatar}
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-slate-100"
+              alt="avatar"
+            />
+          )}
+
           <div className="text-left hidden sm:block">
             <div className="text-sm font-semibold text-[#5686F5]">
               {user?.name || "Emma Wilson"}
