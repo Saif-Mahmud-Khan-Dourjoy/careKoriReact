@@ -4,7 +4,7 @@ import Modal from "../../components/ui/Modal"
 import { Input, Label, Radio } from "../../components/ui/Fields"
 import { useFormik } from "formik"
 import * as Yup from "yup"
-import { use, useEffect, useMemo, useState } from "react"
+import {  useEffect, useMemo, useState } from "react"
 import Select from "react-select" // react-select
 
 
@@ -297,6 +297,8 @@ export default function PromoCodeUpsertModal({
               }}
               classNamePrefix="rs"
               placeholder="Select users…"
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
             />
 
             <Error name="users_multi" />
@@ -321,9 +323,10 @@ export default function PromoCodeUpsertModal({
               }}
               classNamePrefix="rs"
               placeholder="Select roles…"
+              menuPortalTarget={document.body}
+              styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
             />
             <Error name="roles_multi" />
-
           </div>
         )}
 
@@ -333,7 +336,6 @@ export default function PromoCodeUpsertModal({
               <Label>Role (single)</Label>
               <Select
                 options={providerRoleOptions}
-                
                 value={providerRoleOptions?.filter(
                   (item) => item.value === f.values.role_single
                 )}
@@ -345,6 +347,8 @@ export default function PromoCodeUpsertModal({
                 }}
                 classNamePrefix="rs"
                 placeholder="Select role…"
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
               <Error name="role_single" />
             </div>
@@ -362,7 +366,6 @@ export default function PromoCodeUpsertModal({
                   f.setFieldValue("specs_multi", values)
                   f.setFieldValue("users_multi", [])
                   f.setFieldValue("roles_multi", [])
-                  
                 }}
                 classNamePrefix="rs"
                 isDisabled={!f.values.role_single}
@@ -371,6 +374,8 @@ export default function PromoCodeUpsertModal({
                     ? "Select specialities…"
                     : "Select role first"
                 }
+                menuPortalTarget={document.body}
+                styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
               />
               <Error name="specs_multi" />
             </div>
@@ -388,7 +393,7 @@ export default function PromoCodeUpsertModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border px-6 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+            className="rounded-lg border border-slate-500 px-6 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
           >
             Cancel
           </button>

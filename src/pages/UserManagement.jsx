@@ -934,7 +934,7 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
               <Td className="flex justify-center ">
                 <div className="flex gap-2">
                   <button
-                    className="rounded  border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
                   >
                     Edit
@@ -948,7 +948,7 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
                       />
                     </div>
                     <button
-                      className="rounded border-slate-500 px-3 py-1.5 text-xs hover:border-red-400   hover:bg-red-50 "
+                      className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:border-red-400   hover:bg-red-50 "
                       onClick={() =>
                         setDeleteGetterAnchor((cur) =>
                           cur === r.id ? null : r.id
@@ -1041,7 +1041,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                           />
                         </div>
                         <button
-                          className="rounded bg-emerald-500/90 text-white px-3 py-1.5 text-xs hover:bg-emerald-600"
+                          className="rounded bg-emerald-500/90 text-white px-3 py-2 text-xs hover:bg-emerald-600"
                           onClick={() =>
                             setAcceptProviderAnchor((cur) =>
                               cur === r.id ? null : r.id
@@ -1063,7 +1063,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                           />
                         </div>
                         <button
-                          className="rounded bg-rose-500/90 text-white px-3 py-1.5 text-xs hover:bg-rose-600"
+                          className="rounded bg-rose-500/90 text-white px-3 py-2 text-xs hover:bg-rose-600"
                           onClick={() =>
                             setRejectProviderAnchor((cur) =>
                               cur === r.id ? null : r.id
@@ -1079,7 +1079,7 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                   {(r?.profile?.active_status == 1 ) && (
                       <>
                   <button
-                    className="rounded border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
                   >
                     Edit
@@ -1165,7 +1165,7 @@ function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, remove
               <Td>
                 <div className="flex gap-2 justify-center">
                   <button
-                    className="rounded border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
+                    className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
                     onClick={() => handleClick(r)}
                   >
                     Edit

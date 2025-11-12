@@ -41,7 +41,7 @@ export default function Sidebar({ onNavigate }) {
                 ].join(" ")
               }
             >
-              <img src={it.icon} alt="" />
+              <img style={{ width: "20px" }} src={it.icon} alt="" />
               <span className="text-sm font-medium">{it.label}</span>
             </NavLink>
           </li>
@@ -52,7 +52,7 @@ export default function Sidebar({ onNavigate }) {
             onClick={logout}
             className="w-full flex items-center gap-3 px-5 py-2 bg-white text-left text-slate-700 hover:border-red-600 hover:bg-red-50 hover:text-red-600 transition"
           >
-            <img src={logoutIcon} alt="" />
+            <img style={{ width: "20px" }} src={logoutIcon} alt="" />
             <span className="text-sm font-medium">Logout</span>
           </button>
         </li>

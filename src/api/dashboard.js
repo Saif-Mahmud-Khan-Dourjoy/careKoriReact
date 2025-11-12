@@ -134,7 +134,9 @@ export const approveProviderApi = (providerUniqueId) => {
       if (error.response) {
         return [
           false,
-          error.response.data?.message || "Failed to Update approve requests",
+          error.response.data?.message ||
+            error?.response?.data?.details ||
+            "Failed to Update approve requests",
         ]
       } else if (error.request) {
         return [false, "No response from server"]

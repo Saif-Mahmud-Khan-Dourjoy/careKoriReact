@@ -299,7 +299,7 @@ export default function Complaints() {
                   <Td className="flex justify-center">
                     <div className="flex items-center gap-4">
                       <button
-                        className="rounded bg-white border-slate-500 text-blue-400 px-3 py-1.5 text-xs hover:bg-slate-50"
+                        className="rounded bg-white border border-slate-500 text-blue-400 px-3 py-1.5 text-xs hover:bg-slate-50"
                         onClick={() => setModal({ open: true, data: r })}
                       >
                         Details
