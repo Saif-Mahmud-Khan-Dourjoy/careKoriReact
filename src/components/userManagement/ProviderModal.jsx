@@ -267,36 +267,35 @@ export default function ProviderModal({
     validationSchema,
     onSubmit: async (values) => {
       const formData = new FormData()
+      // Always append payment_account with the correct value
       Object.entries(values).forEach(([key, value]) => {
         if (key === "avatar") {
           if (value != null) {
             formData.append("avatar", value)
           }
-        } else if (
-          values?.payment_type === "MFS" &&
-          key === "payment_account_bkash"
-        ) {
-          formData.append("payment_account", value)
-        } else if (
-          values?.payment_type === "BANK" &&
-          key === "payment_account_bank"
-        ) {
-          formData.append("payment_account", value)
         } else if (key === "availabilities") {
           if (!Array.isArray(value)) return
           else if (value.length === 0) return
           formData.append("availabilities", JSON.stringify(value))
-        } else if (!isEdit && key !== "isEdit" && key !== "password2") {
-          formData.append(key, value)
-        } else if (
-          isEdit &&
-          key !== "isEdit" &&
-          key !== "password" &&
-          key !== "password2"
-        ) {
-          formData.append(key, value)
+        } else if (key !== "payment_account_bkash" && key !== "payment_account_bank") {
+          if (!isEdit && key !== "isEdit" && key !== "password2") {
+            formData.append(key, value)
+          } else if (
+            isEdit &&
+            key !== "isEdit" &&
+            key !== "password" &&
+            key !== "password2"
+          ) {
+            formData.append(key, value)
+          }
         }
       })
+      // Append payment_account based on payment_type
+      if (values?.payment_type === "BANK") {
+        formData.append("payment_account", values.payment_account_bank || "")
+      } else if (values?.payment_type === "MFS") {
+        formData.append("payment_account", values.payment_account_bkash || "")
+      }
       if (!isEdit) {
         console.log("Form Data to submit:", formData)
         await onSubmit?.(formData)
@@ -692,16 +691,16 @@ export default function ProviderModal({
             <div>
               <Label>Lawyer Speciality</Label>
               <SelectRS
-                options={providerSpeciality?.[values?.role] || []}
+                options={providerSpecialityOptions}
                 value={
-                  providerSpeciality?.[values?.role] ||
-                  []?.filter(
+                  providerSpecialityOptions?.filter(
                     (item) => item.value === values.lawyer_speciality_id
-                  )
+                  ) || null
                 }
                 onChange={(e) => {
                   setFieldValue("lawyer_speciality_id", e?.value ?? "")
                 }}
+                placeholder="Select Speciality"
                 classNamePrefix="rs"
                 menuPortalTarget={document.body}
                 styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
@@ -716,16 +715,16 @@ export default function ProviderModal({
             <div>
               <Label>Common Speciality</Label>
               <SelectRS
-                options={providerSpeciality?.[values?.role] || []}
+                options={providerSpecialityOptions}
                 value={
-                  providerSpeciality?.[values?.role] ||
-                  []?.filter(
+                  providerSpecialityOptions?.filter(
                     (item) => item.value === values.common_speciality_id
-                  )
+                  ) || null
                 }
                 onChange={(e) => {
                   setFieldValue("common_speciality_id", e?.value ?? "")
                 }}
+                placeholder="Select Speciality"
                 classNamePrefix="rs"
                 menuPortalTarget={document.body}
                 styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
