@@ -80,7 +80,7 @@ button:focus-visible {
 @tailwind utilities;
 
 /* Force UA theming to light even if OS is dark */
-:root { color-scheme: light; }
+:root { color-scheme: light; font-family: "Roboto", sans-serif; }
 
 /* Page shell must be a solid light background (no transparency) */
 @layer base {

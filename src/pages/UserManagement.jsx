@@ -15,6 +15,7 @@ import { approveProviderApi, deleteProviderApi } from "../api/dashboard"
 import { getProviderRolesSpecialityApi } from "../api/promocode"
 import addIcon from "/images/user-add.png"
 import searchIcon from "/images/searchIcon.png"
+import noImage from "/images/noImage.png"
 
 
 
@@ -699,8 +700,9 @@ useEffect(() => {
   }
 
 
+console.log("Filtered Providers:", filteredProviders)
 
-
+  
   return (
     <>
       <LoaderModal
@@ -750,7 +752,7 @@ useEffect(() => {
           </div>
           {tab === "Getters" && (
             <button
-              onClick={() => setAddGetterOpen(true)}
+              onClick={() => {setAddGetterOpen(true); setGetterInitial(null)}}
               className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5 border-none focus:outline-none focus:ring-0"
             >
               <div className="flex gap-2">
@@ -760,7 +762,7 @@ useEffect(() => {
           )}
           {tab === "Providers" && (
             <button
-              onClick={() => setAddProviderOpen(true)}
+              onClick={() => {setAddProviderOpen(true); setProviderInitial(null)}}
               className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5 border-none focus:outline-none focus:ring-0"
             >
               <div className="flex gap-2">
@@ -770,7 +772,7 @@ useEffect(() => {
           )}
           {tab === "Moderators" && (
             <button
-              onClick={() => setAddModeratorOpen(true)}
+              onClick={() => {setAddModeratorOpen(true); setModeratorInitial(null)}}
               className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2.5 border-none focus:outline-none focus:ring-0"
             >
               <div className="flex gap-2">
@@ -823,6 +825,11 @@ useEffect(() => {
           getterRole={getterRole}
         />
         <ProviderModal
+          key={
+            addProviderOpen && !providerInitial
+              ? "add"
+              : providerInitial?.id || "edit"
+          }
           open={addProviderOpen}
           onClose={() => {
             setAddProviderOpen(false), setProviderInitial(null)
@@ -914,9 +921,15 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
               <Td>{i + 1}</Td>
               <Td>
                 <div className="flex items-center gap-3">
-                  {r?.customer_profile?.avatar && (
+                  {r?.customer_profile?.avatar ? (
                     <img
                       src={r.customer_profile.avatar}
+                      alt=""
+                      className="h-8 w-8 rounded-full"
+                    />
+                  ) : (
+                    <img
+                      src={noImage}
                       alt=""
                       className="h-8 w-8 rounded-full"
                     />
@@ -971,9 +984,7 @@ function GetterTable({ rows, setGetterInitial, setAddGetterOpen, removeGetter })
 function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removeProvider , approveProvider, deleteProvider }) {
   const [deleteProviderAnchor, setDeleteProviderAnchor] = useState(null)
   const [acceptProviderAnchor, setAcceptProviderAnchor] = useState(null)
-
   const [rejectProviderAnchor, setRejectProviderAnchor] = useState(null)
-
 
   const removeRow = async (uniqueUserId) => {
     await deleteProvider(uniqueUserId)
@@ -981,29 +992,48 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
   const approveRow = async (uniqueUserId) => {
     await approveProvider(uniqueUserId)
   }
-    const handleClick = (record) => {
-      
-      setProviderInitial(record)
-      setAddProviderOpen(true)
+  const handleClick = (record) => {
+    setProviderInitial(record)
+    setAddProviderOpen(true)
   };
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full">
+      <table className="min-w-max w-full">
         <thead className="bg-white">
           <tr>
+            <Th>Name</Th>
+            <Th>Email</Th>
+            <Th>Unique ID</Th>
             <Th>Phone</Th>
-            <Th>Registration No.</Th>
+            <Th>Pricing</Th>
             <Th>Gender</Th>
+            <Th>Date of Birth</Th>
+            <Th>District</Th>
+            <Th>Thana</Th>
+            <Th>Identification No.</Th>
+            <Th>Registration No.</Th>
             <Th>Address</Th>
-            <Th>Consultation Fee</Th>
-            <Th>Payment Method</Th>
+            <Th>Payment Type</Th>
+            <Th>Payment Account</Th>
+            <Th>Bank Name</Th>
+            <Th>Account Title</Th>
+            <Th>Speciality</Th>
             <Th className="text-center">Action</Th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className=" last:border-0">
-              <Td className="font-medium">{r.phone}</Td>
+            <tr key={i} className="last:border-0">
+              <Td>{r?.name || null}</Td>
+              <Td>{r?.email || null}</Td>
+              <Td>{r?.unique_user_id || null}</Td>
+              <Td>{r?.phone || null}</Td>
+              <Td>{r?.profile?.pricing || null}</Td>
+              <Td>{r?.profile?.gender || null}</Td>
+              <Td>{r?.profile?.dob || null}</Td>
+              <Td>{r?.profile?.district || null}</Td>
+              <Td>{r?.profile?.thana || null}</Td>
+              <Td>{r?.profile?.identification_no || null}</Td>
               <Td>
                 {r?.profile_type == "doctor"
                   ? r?.profile?.registration_no
@@ -1011,26 +1041,25 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                   ? r?.profile?.bar_registration_no
                   : r?.profile?.unique_identification?.unique_identification_no}
               </Td>
-              <Td>{r?.profile?.gender}</Td>
-              <Td>{r?.profile?.address}</Td>
-              <Td>{r?.profile?.pricing}</Td>
-              <Td>{r?.profile?.payment_type}</Td>
-              <Td >
+              <Td>{r?.profile?.address || null}</Td>
+              <Td>{r?.profile?.payment_type || null}</Td>
+              <Td>{r?.profile?.payment_account || null}</Td>
+              <Td>{r?.profile?.bank_name || null}</Td>
+              <Td>{r?.profile?.account_title || null}</Td>
+              <Td>
+                {r?.profile_type == "doctor"
+                  ? r?.profile?.doctor_speciality?.specialized_at
+                  : r?.profile_type == "lawyer"
+                  ? r?.profile?.lawyer_speciality?.specialized_at
+                  : r?.profile?.common_speciality?.specialized_at}
+              </Td>
+             
+              <Td>
                 <div className="flex gap-2 justify-center">
                   {(r?.profile?.active_status == 0 ||
                     r?.profile?.active_status == null ||
                     r?.profile?.active_status == false) && (
                     <>
-                      {/* <button
-                        className="rounded bg-emerald-500/90 text-white px-3 py-1.5 text-xs hover:bg-emerald-600"
-                        onClick={() =>
-                          setAcceptProviderAnchor((cur) =>
-                            cur === r.id ? null : r.id
-                          )
-                        }
-                      >
-                        Accept
-                      </button> */}
                       <div className="relative">
                         <div className="absolute right-0 top-[-190%] z-50">
                           <PopoverConfirm
@@ -1051,8 +1080,6 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                           Accept
                         </button>
                       </div>
-                    
-
                       <div className="relative">
                         <div className="absolute right-0 top-[-190%] z-50">
                           <PopoverConfirm
@@ -1075,35 +1102,34 @@ function ProviderTable({ rows, setProviderInitial, setAddProviderOpen, removePro
                       </div>
                     </>
                   )}
-
-                  {(r?.profile?.active_status == 1 ) && (
-                      <>
-                  <button
-                    className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
-                    onClick={() => handleClick(r)}
-                  >
-                    Edit
-                  </button>
-                  <div className="relative">
-                    <div className="absolute right-0 top-[-190%] z-50">
-                      <PopoverConfirm
-                        open={deleteProviderAnchor === r.id}
-                        onClose={() => setDeleteProviderAnchor(null)}
-                        onYes={() => removeRow(r.unique_user_id)}
-                      />
-                    </div>
-                    <button
-                      className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 hover:border-red-500 border-slate-500"
-                      onClick={() =>
-                        setDeleteProviderAnchor((cur) =>
-                          cur === r.id ? null : r.id
-                        )
-                      }
-                    >
-                      Delete
-                    </button>
-                  </div>
-                  </>
+                  {r?.profile?.active_status == 1 && (
+                    <>
+                      <button
+                        className="rounded border border-slate-500 px-3 py-1.5 text-xs hover:bg-slate-50"
+                        onClick={() => handleClick(r)}
+                      >
+                        Edit
+                      </button>
+                      <div className="relative">
+                        <div className="absolute right-0 top-[-190%] z-50">
+                          <PopoverConfirm
+                            open={deleteProviderAnchor === r.id}
+                            onClose={() => setDeleteProviderAnchor(null)}
+                            onYes={() => removeRow(r.unique_user_id)}
+                          />
+                        </div>
+                        <button
+                          className="rounded border px-3 py-1.5 text-xs hover:bg-red-50 hover:border-red-500 border-slate-500"
+                          onClick={() =>
+                            setDeleteProviderAnchor((cur) =>
+                              cur === r.id ? null : r.id
+                            )
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </>
                   )}
                 </div>
               </Td>
@@ -1144,9 +1170,15 @@ function ModeratorTable({ rows, setModeratorInitial, setAddModeratorOpen, remove
               <Td>{i + 1}</Td>
               <Td>
                 <div className="flex items-center gap-3">
-                  {r?.moderator_profile?.avatar && (
+                  {r?.moderator_profile?.avatar ? (
                     <img
                       src={r?.moderator_profile?.avatar}
+                      alt=""
+                      className="h-8 w-8 rounded-full"
+                    />
+                  ): (
+                    <img
+                      src={noImage}
                       alt=""
                       className="h-8 w-8 rounded-full"
                     />

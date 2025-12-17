@@ -16,6 +16,8 @@ import Complaints from "./pages/Complaints"
 import Revenue from "./pages/Revenue"
 import Promos from "./pages/Promos"
 import Settings from "./pages/Settings"
+import CategorySubcategory from "./pages/CategorySubCategory"
+import Test from "./pages/Test"
 
 export default function App() {
   return (
@@ -35,7 +37,16 @@ export default function App() {
             <Route path="/revenue" element={<Revenue />} />
             <Route path="/promos" element={<Promos />} />
             <Route path="/settings" element={<Settings />} />
+            <Route
+              path="/categories-subcategories"
+              element={<CategorySubcategory />}
+            />
           </Route>
+           <Route
+              path="/test"
+              element={<Test />}
+            />
+         
         </Route>
 
         {/* 404 */}
