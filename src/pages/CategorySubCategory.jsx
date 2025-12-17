@@ -67,6 +67,7 @@ export default function CategorySubcategory() {
   })
 
   const [deleteAnchor, setDeleteAnchor] = useState(null)
+  const [deleteType, setDeleteType] = useState(null)
 
   const filteredCats = useMemo(() => {
     if (!query.trim()) return categories
@@ -314,6 +315,9 @@ export default function CategorySubcategory() {
     ]).finally(() => setLoading(false))
   }
 
+
+  console.log("Subcategories:", subcategories)
+
   return (
     <>
       <LoaderModal
@@ -486,7 +490,7 @@ export default function CategorySubcategory() {
               </thead>
               <tbody className="divide-y">
                 {filteredSubs.map((s, i) => (
-                  <tr key={s.id} className="[&>td]:py-3 [&>td]:px-5">
+                  <tr key={`${s.id}-${s.type}`} className="[&>td]:py-3 [&>td]:px-5">
                     <td>{i + 1}</td>
                     <td className=" ">
                       {s?.icon ? (
@@ -532,17 +536,19 @@ export default function CategorySubcategory() {
                       <div className="relative">
                         <div className="absolute right-0 top-[-190%] z-50">
                           <PopoverConfirm
-                            open={deleteAnchor === s.id}
-                            onClose={() => setDeleteAnchor(null)}
+                            open={deleteAnchor === s.id && deleteType === s.type}
+                            onClose={() => {setDeleteAnchor(null) ; setDeleteType(null)}}
                             onYes={() => askDeleteSub(s.id, s.type)}
                           />
                         </div>
                         <button
                           className="rounded border bg-white px-3 py-1.5 text-xs  hover:border-red-400 hover:bg-red-50"
-                          onClick={() =>
+                          onClick={() =>{
                             setDeleteAnchor((cur) =>
                               cur === s.id ? null : s.id
-                            )
+                            );
+                            setDeleteType((cur) => (cur === s.type ? null : s.type))
+                          }
                           }
                         >
                           Delete
