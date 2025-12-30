@@ -1,47 +1,118 @@
+
+
+/* eslint-disable */
 import Modal from "../../components/ui/Modal"
 import { Input, Label, Radio } from "../../components/ui/Fields"
 import { useFormik } from "formik"
 import * as Yup from "yup"
+import Select from "react-select"
+import { useEffect, useMemo, useState } from "react"
+import { lastHistory } from "../../api/RecordPayment"
 
-export default function RecordPaymentModal({ open, onClose, onSubmit }) {
+export default function RecordPaymentModal({
+  open,
+  onClose,
+  onSubmit,
+  providers = [],
+  
+}) {
+  
+  // Build select options: "Name (Role, Department)"
+  const providerOptions = useMemo(() => {
+    return (providers || []).map((p) => ({
+      value: p.id, // user_id
+      label: `${p.name || ""} (${
+        p.role.slice(0, 1).toUpperCase() + p.role.slice(1) || "N/A"
+      }, ${p.specialized_at || "N/A"})`,
+      meta: p, // keep whole provider
+    }))
+  }, [providers])
+
   const f = useFormik({
     enableReinitialize: true,
     initialValues: {
-      name: "",
-      uid: "",
-      phone: "",
-      occupation: "",
-      department: "",
-      totalIncome: "",
-      amountDue: "",
-      amountReceived: "",
-      trxDateTime: "",
-      lastTrxId: "",
-      receivedDateTime: "",
-      sentAmount: "",
-      sentDateTime: "",
-      sentVia: "Bank",
-      refNo: "",
+      // --- DB columns (migration aligned) ---
+      user_id: null,
+
+      trx_datetime: "",
+      trx_id: "",
+      amount_received_datetime: "",
+      sent_amount: "",
+      sent_datetime: "",
+      sent_via: "MFS", // enum: MFS | BANK
+      sent_trx_id: "", // if MFS
+      sent_bank_acc: "", // if BANK
+      
+
+      // --- UI-only fields (not stored in payment_records table) ---
+      provider_display: null, // react-select option object
+      provider_uid: "",
+      provider_phone: "",
+      provider_occupation: "",
+      provider_department: "",
+      total_income: "",
+      amount_due: "",
+      amount_received: "",
     },
+
     validationSchema: Yup.object({
-      name: Yup.string().required("Required"),
-      uid: Yup.string().required("Required"),
-      phone: Yup.string().required("Required"),
-      occupation: Yup.string().required("Required"),
-      department: Yup.string().required("Required"),
-      totalIncome: Yup.number().typeError("Number").required("Required"),
-      amountDue: Yup.number().typeError("Number").required("Required"),
-      amountReceived: Yup.number().typeError("Number").required("Required"),
-      trxDateTime: Yup.string().required("Required"),
-      sentAmount: Yup.number().typeError("Number").required("Required"),
-      sentDateTime: Yup.string().required("Required"),
-      sentVia: Yup.string().oneOf(["Bank", "Bkash"]).required(),
-      refNo: Yup.string().required("Required"),
+      user_id: Yup.number()
+        .typeError("Select a provider")
+        .required("Provider is required"),
+
+      // total_income: Yup.number().typeError("Number").required("Required"),
+      // amount_due: Yup.number().typeError("Number").required("Required"),
+      // amount_received: Yup.number().typeError("Number").required("Required"),
+
+      trx_datetime: Yup.string().required("Required"),
+      // trx_id optional (your migration nullable). if you want required, uncomment below:
+      trx_id: Yup.string().required("Required"),
+      amount_received_datetime: Yup.string().required("Required"),
+
+      sent_amount: Yup.number().typeError("Number").required("Required"),
+      sent_datetime: Yup.string().required("Required"),
+      sent_via: Yup.string().oneOf(["MFS", "BANK"]).required("Required"),
+
+      // Conditional validation based on sent_via
+      sent_trx_id: Yup.string().when("sent_via", {
+        is: "MFS",
+        then: (s) => s.required("Bkash/MFS Trx ID is required"),
+        otherwise: (s) => s.notRequired(),
+      }),
+      sent_bank_acc: Yup.string().when("sent_via", {
+        is: "BANK",
+        then: (s) => s.required("Bank account no. is required"),
+        otherwise: (s) => s.notRequired(),
+      }),
     }),
+
     onSubmit: async (values, { setSubmitting }) => {
-      await onSubmit?.(values)
-      setSubmitting(false)
-      onClose?.()
+      try {
+        const payload = {
+          ...values,
+        }
+
+        delete payload.provider_display
+        delete payload.provider_uid
+        delete payload.provider_phone
+        delete payload.provider_occupation
+        delete payload.provider_department
+        delete payload.total_income
+        delete payload.amount_due
+        delete payload.amount_received
+
+        if (payload.sent_via === "MFS") {
+          payload.sent_bank_acc = null
+        } else if (payload.sent_via === "BANK") {
+          payload.sent_trx_id = null
+        }
+
+        await onSubmit?.(payload)
+        setSubmitting(false)
+        onClose?.()
+      } catch (e) {
+        setSubmitting(false)
+      }
     },
   })
 
@@ -49,6 +120,57 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
     f.touched[name] && f.errors[name] ? (
       <p className="mt-1 text-xs text-rose-600">{f.errors[name]}</p>
     ) : null
+
+  const handleProviderChange = (selectedOption) => {
+    f.setFieldValue("provider_display", selectedOption)
+
+    if (!selectedOption) {
+      // clear everything
+      f.setFieldValue("user_id", null)
+      f.setFieldValue("provider_uid", "")
+      f.setFieldValue("provider_phone", "")
+      f.setFieldValue("provider_occupation", "")
+      f.setFieldValue("provider_department", "")
+      f.setFieldValue("total_income", "")
+      f.setFieldValue("amount_due", "")
+      f.setFieldValue("amount_received", "")
+      return
+    }
+
+    const p = selectedOption.meta || {}
+
+    // Set FK user_id for DB
+    f.setFieldValue("user_id", p.id)
+
+    // Auto-fill UI-only fields
+    f.setFieldValue("provider_uid", p.unique_user_id || "N/A")
+    f.setFieldValue("provider_phone", p.phone || "N/A")
+    f.setFieldValue(
+      "provider_occupation",
+      p.role.slice(0, 1).toUpperCase() + p.role.slice(1) || "N/A"
+    )
+    f.setFieldValue("provider_department", p.specialized_at || "N/A")
+    f.setFieldValue("total_income", p.total_income || 0)
+    f.setFieldValue("amount_due", p.amount_due || 0)
+    f.setFieldValue("amount_received", p.amount_received || 0)
+
+  }
+   
+
+
+  // react-select styling baseline (keeps your UI consistent)
+  const selectStyles = {
+    control: (base) => ({
+      ...base,
+      minHeight: 42,
+      borderRadius: 8,
+      borderColor: "#cbd5e1",
+      boxShadow: "none",
+    }),
+    menu: (base) => ({ ...base, zIndex: 9999 }),
+  }
+
+
 
   return (
     <Modal
@@ -62,102 +184,124 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
           Receiver Details
         </div>
 
+        {/* Provider select */}
         <div>
-          <Label>Name</Label>
-          <Input {...f.getFieldProps("name")} />
-          <Error name="name" />
+          <Label>Provider</Label>
+          <Select
+            inputId="provider_select"
+            placeholder="Search provider..."
+            isClearable
+            isSearchable
+            options={providerOptions}
+            value={f.values.provider_display}
+            onChange={handleProviderChange}
+            styles={selectStyles}
+          />
+          <Error name="user_id" />
         </div>
+
+        {/* Auto-filled fields (readOnly) */}
         <div>
           <Label>ID</Label>
-          <Input {...f.getFieldProps("uid")} />
-          <Error name="uid" />
+          <Input value={f.values.provider_uid} readOnly />
         </div>
         <div>
           <Label>Phone</Label>
-          <Input {...f.getFieldProps("phone")} />
-          <Error name="phone" />
+          <Input value={f.values.provider_phone} readOnly />
         </div>
         <div>
           <Label>Occupation</Label>
-          <Input {...f.getFieldProps("occupation")} />
-          <Error name="occupation" />
+          <Input value={f.values.provider_occupation} readOnly />
         </div>
         <div>
           <Label>Department</Label>
-          <Input {...f.getFieldProps("department")} />
-          <Error name="department" />
+          <Input value={f.values.provider_department} readOnly />
         </div>
 
+        {/* Money fields (DB aligned) */}
         <div>
           <Label>Total Income</Label>
-          <Input {...f.getFieldProps("totalIncome")} />
-          <Error name="totalIncome" />
+          <Input {...f.getFieldProps("total_income")} readOnly />
+          {/* <Error name="total_income" /> */}
         </div>
         <div>
           <Label>Amount Due</Label>
-          <Input {...f.getFieldProps("amountDue")} />
-          <Error name="amountDue" />
+          <Input {...f.getFieldProps("amount_due")} readOnly />
+          {/* <Error name="amount_due" /> */}
         </div>
         <div>
           <Label>Amount Received</Label>
-          <Input {...f.getFieldProps("amountReceived")} />
-          <Error name="amountReceived" />
+          <Input {...f.getFieldProps("amount_received")} readOnly />
+          {/* <Error name="amount_received" /> */}
         </div>
 
         <div>
           <Label>Trx Date & Time</Label>
-          <Input
-            placeholder="6th Jun 25, 15:32"
-            {...f.getFieldProps("trxDateTime")}
-          />
-          <Error name="trxDateTime" />
+          <Input type="datetime-local" {...f.getFieldProps("trx_datetime")} />
+          <Error name="trx_datetime" />
         </div>
         <div>
-          <Label>Last Trx ID</Label>
-          <Input {...f.getFieldProps("lastTrxId")} />
+          <Label>Trx ID</Label>
+          <Input {...f.getFieldProps("trx_id")} />
+          <Error name="trx_id" />
+          {/* optional */}
         </div>
         <div>
           <Label>Amount Received Date & Time</Label>
-          <Input {...f.getFieldProps("receivedDateTime")} />
+          <Input
+            type="datetime-local"
+            {...f.getFieldProps("amount_received_datetime")}
+          />
+          <Error name="amount_received_datetime" />
         </div>
 
         <div className="pt-1 text-center text-sm font-medium text-slate-600">
           Super Admin Details
         </div>
+
         <div>
           <Label>Amount Sent</Label>
-          <Input {...f.getFieldProps("sentAmount")} />
-          <Error name="sentAmount" />
+          <Input {...f.getFieldProps("sent_amount")} />
+          <Error name="sent_amount" />
         </div>
         <div>
-          <Label>Date & Time</Label>
-          <Input {...f.getFieldProps("sentDateTime")} />
-          <Error name="sentDateTime" />
+          <Label>Sent Date & Time</Label>
+          <Input type="datetime-local" {...f.getFieldProps("sent_datetime")} />
+          <Error name="sent_datetime" />
         </div>
 
         <div>
           <Label>Sent Via</Label>
           <div className="flex items-center gap-6 pt-2">
             <Radio
-              name="sentVia"
-              label="Bank"
-              checked={f.values.sentVia === "Bank"}
-              onChange={() => f.setFieldValue("sentVia", "Bank")}
+              name="sent_via"
+              label="BANK"
+              checked={f.values.sent_via === "BANK"}
+              onChange={() => f.setFieldValue("sent_via", "BANK")}
             />
             <Radio
-              name="sentVia"
-              label="Bkash"
-              checked={f.values.sentVia === "Bkash"}
-              onChange={() => f.setFieldValue("sentVia", "Bkash")}
+              name="sent_via"
+              label="MFS"
+              checked={f.values.sent_via === "MFS"}
+              onChange={() => f.setFieldValue("sent_via", "MFS")}
             />
           </div>
+          <Error name="sent_via" />
         </div>
 
-        <div>
-          <Label>Bkash Trx ID / Bank Account No.</Label>
-          <Input {...f.getFieldProps("refNo")} />
-          <Error name="refNo" />
-        </div>
+        {f.values.sent_via === "MFS" ? (
+          <div>
+            <Label>Bkash/MFS Trx ID</Label>
+            <Input {...f.getFieldProps("sent_trx_id")} />
+            <Error name="sent_trx_id" />
+          </div>
+        ) : (
+          <div>
+            <Label>Bank Account No.</Label>
+            <Input {...f.getFieldProps("sent_bank_acc")} />
+            <Error name="sent_bank_acc" />
+          </div>
+        )}
 
         <div className="flex justify-center gap-3 pt-2">
           <button
@@ -179,3 +323,4 @@ export default function RecordPaymentModal({ open, onClose, onSubmit }) {
     </Modal>
   )
 }
+
