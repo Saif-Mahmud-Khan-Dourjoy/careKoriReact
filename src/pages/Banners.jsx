@@ -9,8 +9,10 @@ import {
   getAllBanner,
   createBannerApi,
   createRoleSpecificBannerApi,
+  deleteBannerApi,
 } from "../api/Banner"
 import StatusModal from "../components/ui/StatusModal"
+import ConfirmModal from "../components/ui/ConfirmModal"
 
 const Th = ({ children, className = "" }) => (
   <th
@@ -44,7 +46,7 @@ export default function Banners() {
     const [statusModalSuccess, setStatusModalSuccess] = useState(false)
     const [errorMsg, setErrorMsg] = useState("")
 
-
+  const [confirmModal, setConfirmModal] = useState({ open: false, bannerId: null })
 
   const [modal, setModal] = useState({ open: false, initial: null })
 
@@ -93,6 +95,21 @@ export default function Banners() {
     }
   }
 
+  const handleDeleteBanner = async () => {
+    const bannerId = confirmModal.bannerId
+    setConfirmModal({ open: false, bannerId: null })
+    
+    setLoading(true)
+    try {
+      const [success, data] = await deleteBannerApi(bannerId)
+      setStatusModalSuccess(!!success)
+      setErrorMsg(success ? "" : data)
+      setStatusModalOpen(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
 
 
   const roleNameById = (roleId) => {
@@ -131,6 +148,7 @@ export default function Banners() {
               <Th>Banner Image</Th>
               <Th>Is Role Specific</Th>
               <Th>Role For</Th>
+              <Th>Actions</Th>
             </tr>
           </thead>
 
@@ -165,7 +183,15 @@ export default function Banners() {
                     </span>
                   )}
                 </Td>
-                <Td>{roleNameById(r.role_id)}</Td>
+                <Td>{r.role_name}</Td>
+                <Td>
+                  <button
+                    onClick={() => setConfirmModal({ open: true, bannerId: r.id })}
+                    className="inline-flex items-center gap-1 rounded-lg bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </Td>
               </tr>
             ))}
           </tbody>
@@ -192,6 +218,13 @@ export default function Banners() {
         onClose={closeStatusModal}
         success={statusModalSuccess}
         errorMsg={errorMsg}
+      />
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        open={confirmModal.open}
+        onClose={() => setConfirmModal({ open: false, bannerId: null })}
+        onConfirm={handleDeleteBanner}
       />
     </div>
   )

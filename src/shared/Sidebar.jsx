@@ -98,12 +98,16 @@ export default function Sidebar({ onNavigate }) {
                 </span>
               </button>
               {(settingsOpen || isAnyChildActive) && (
-                <ul className="pl-10 pt-2">
+                <ul className="pl-10 pt-2" onClick={(e) => e.stopPropagation()}>
                   {it.children.map((child) => (
                     <li key={child.to}>
                       <NavLink
                         to={child.to}
-                        onClick={onNavigate}
+                        onClick={(e) => {
+                          if (onNavigate) {
+                            onNavigate()
+                          }
+                        }}
                         className={({ isActive }) =>
                           [
                             "block py-1 text-sm rounded transition pl-4", // left padding for child look

@@ -67,3 +67,21 @@ export const createRoleSpecificBannerApi = (roleId, formData) => {
       }
     })
 }
+
+export const deleteBannerApi = (bannerId) => {
+  return api
+    .delete(`/banner/delete/${bannerId}`)
+    .then((res) => [true, res?.data])
+    .catch((error) => {
+      if (error.response) {
+        return [
+          false,
+          error.response.data?.message || "Failed to delete banner",
+        ]
+      } else if (error.request) {
+        return [false, "No response from server"]
+      } else {
+        return [false, error.message || "Error deleting banner"]
+      }
+    })
+}
