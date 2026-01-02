@@ -89,15 +89,15 @@ export default function Sidebar({ onNavigate }) {
                     : "text-slate-700 hover:bg-slate-100",
                 ].join(" ")}
                 onClick={() => setSettingsOpen((open) => !open)}
-                aria-expanded={settingsOpen || isAnyChildActive}
+                aria-expanded={settingsOpen}
               >
                 <img style={{ width: "20px" }} src={it.icon} alt="" />
                 <span className="text-sm font-medium">{it.label}</span>
                 <span className="ml-auto text-xs">
-                  {settingsOpen || isAnyChildActive ? "▲" : "▼"}
+                  {settingsOpen ? "▲" : "▼"}
                 </span>
               </button>
-              {(settingsOpen || isAnyChildActive) && (
+              {settingsOpen && (
                 <ul className="pl-10 pt-2" onClick={(e) => e.stopPropagation()}>
                   {it.children.map((child) => (
                     <li key={child.to}>
