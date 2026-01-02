@@ -18,6 +18,7 @@ import Promos from "./pages/Promos"
 import Settings from "./pages/Settings"
 import CategorySubcategory from "./pages/CategorySubCategory"
 import Test from "./pages/Test"
+import Banners from "./pages/Banners"
 
 export default function App() {
   return (
@@ -40,6 +41,10 @@ export default function App() {
             <Route
               path="/categories-subcategories"
               element={<CategorySubcategory />}
+            />
+            <Route
+              path="/banner-management"
+              element={<Banners />}
             />
           </Route>
            <Route

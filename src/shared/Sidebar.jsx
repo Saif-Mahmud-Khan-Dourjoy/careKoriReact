@@ -26,6 +26,10 @@ export default function Sidebar({ onNavigate }) {
           to: "/categories-subcategories",
           label: "Category and Subcategory Management",
         },
+        {
+          to: "/banner-management",
+          label: "Banner Management",
+        }
       ],
     },
   ]
